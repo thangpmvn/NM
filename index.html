@@ -4710,55 +4710,111 @@
         }
 
         function submitExam() {
-            clearInterval(timerInterval);
-            let correct = 0;
-            let detailHtml = '';
-            
-            currentQuestions.forEach((q, idx) => {
-                const userPick = userAnswers[q.id];
-                const correctIdx = q.options.findIndex(o => o.correct);
-                const isRight = userPick === correctIdx;
-                if (isRight) correct++;
-                
-                detailHtml += `
-                    <div class="q-card" style="border-left: 5px solid ${isRight ? 'var(--success)' : 'var(--danger)'}">
-                        <div class="q-meta">Câu ${q.id} - ${isRight ? '<span style="color:var(--success)">ĐÚNG</span>' : '<span style="color:var(--danger)">SAI</span>'}</div>
-                        <div class="q-content">
-                             <span class="full-text">${q.original_question}</span>
-                             <span class="short-text">${q.short_question}</span>
-                        </div>
-                        <div>
-                            ${q.options.map((opt, oIdx) => {
-                                let styleClass = "option disabled";
-                                if (oIdx === correctIdx) styleClass += " correct";
-                                if (oIdx === userPick && !opt.correct) styleClass += " wrong";
-                                
-                                return `<div class="${styleClass}">
-                                    <div class="option-marker">${String.fromCharCode(65+oIdx)}</div>
-                                    <div>
-                                        <span class="full-text">${opt.text}</span>
-                                        <span class="short-text">${opt.short || opt.text}</span>
-                                    </div>
-                                </div>`;
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            });
+    clearInterval(timerInterval);
+    let correct = 0;
+    let detailHtml = '';
+    
+    // 1. Tính số câu đúng và tạo HTML chi tiết
+    currentQuestions.forEach((q, idx) => {
+        const userPick = userAnswers[q.id];
+        const correctIdx = q.options.findIndex(o => o.correct);
+        const isRight = userPick === correctIdx;
+        if (isRight) correct++;
+        
+        detailHtml += `
+            <div class="q-card" style="border-left: 5px solid ${isRight ? 'var(--success)' : 'var(--danger)'}">
+                <div class="q-meta">Câu ${q.id} - ${isRight ? '<span style="color:var(--success)">ĐÚNG</span>' : '<span style="color:var(--danger)">SAI</span>'}</div>
+                <div class="q-content">
+                        <span class="full-text">${q.original_question}</span>
+                        <span class="short-text">${q.short_question}</span>
+                </div>
+                <div>
+                    ${q.options.map((opt, oIdx) => {
+                        let styleClass = "option disabled";
+                        if (oIdx === correctIdx) styleClass += " correct";
+                        if (oIdx === userPick && !opt.correct) styleClass += " wrong";
+                        
+                        return `<div class="${styleClass}">
+                            <div class="option-marker">${String.fromCharCode(65+oIdx)}</div>
+                            <div>
+                                <span class="full-text">${opt.text}</span>
+                                <span class="short-text">${opt.short || opt.text}</span>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    });
 
-            document.getElementById('score-display').textContent = `${correct}/${currentQuestions.length}`;
-            document.getElementById('result-detail').innerHTML = detailHtml;
-            showScreen('screen-result');
-        }
+    // 2. Tính toán phần trăm điểm số
+    let totalQuestions = currentQuestions.length;
+    let scorePercent = 0;
 
-        function resetExam() {
-            if (selectedDay && document.getElementById('setup-title').textContent.includes("Ngày")) {
-                startDailyExam();
-            } else {
-                startMixedExam();
-            }
-        }
+    if (totalQuestions > 0) {
+        scorePercent = (correct / totalQuestions) * 100;
+    }
+
+    // Làm tròn 1 số thập phân (ví dụ 6.7)
+    let finalScore = parseFloat(scorePercent.toFixed(1));
+    // Đổi dấu chấm thành dấu phẩy cho đúng chuẩn Việt Nam (6.7 -> 6,7)
+    let displayScore = finalScore.toString().replace('.', ',');
+
+    // 3. Xử lý Logic hiển thị (Màu sắc & Lời nhắn)
+    const scoreDisplay = document.getElementById('score-display');
+    let messageHtml = "";
+    let colorStyle = "";
+
+    // Xóa các thông báo cũ nếu có để tránh bị lặp
+    const oldMsg = document.getElementById('result-message');
+    if (oldMsg) oldMsg.remove();
+    const oldSub = document.getElementById('score-sub-text');
+    if (oldSub) oldSub.remove();
+
+    if (finalScore >= 50) {
+        // TRƯỜNG HỢP ĐẬU (>= 50%) -> Màu Xanh (dùng var(--primary) hoặc var(--success))
+        colorStyle = "var(--primary)"; 
+        scoreDisplay.textContent = `${displayScore}%`; 
+        messageHtml = `Chúc mừng bạn đã đạt ${displayScore}%`;
+    } else {
+        // TRƯỜNG HỢP TRƯỢT (< 50%) -> Màu Đỏ
+        colorStyle = "var(--danger)";
+        scoreDisplay.textContent = `${displayScore}%`;
+        messageHtml = "Bạn hãy ôn luyện để đạt kết quả tốt hơn";
+    }
+
+    // Áp dụng màu cho số điểm to
+    scoreDisplay.style.color = colorStyle;
+
+    // 4. Tạo các dòng thông báo chèn vào dưới điểm số
+    
+    // Dòng thông báo (Chúc mừng/Ôn luyện)
+    const msgDiv = document.createElement('div');
+    msgDiv.id = 'result-message';
+    msgDiv.style.fontSize = "1.2rem";
+    msgDiv.style.fontWeight = "700";
+    msgDiv.style.margin = "10px 0";
+    msgDiv.style.color = colorStyle; // Màu chữ theo điểm
+    msgDiv.textContent = messageHtml;
+
+    // Dòng chi tiết (Số câu đúng)
+    const subDiv = document.createElement('div');
+    subDiv.id = 'score-sub-text';
+    subDiv.style.fontSize = "1rem";
+    subDiv.style.color = "var(--text-sub)";
+    subDiv.style.marginBottom = "20px";
+    subDiv.innerHTML = `(Bạn làm đúng <b>${correct}/${totalQuestions}</b> câu)`;
+
+    // Chèn vào giao diện (sau số điểm to)
+    scoreDisplay.after(subDiv); // Chèn dòng số câu xuống dưới cùng
+    scoreDisplay.after(msgDiv); // Chèn dòng thông báo vào giữa điểm và số câu
+
+    // Hiển thị màn hình kết quả
+    document.getElementById('result-detail').innerHTML = detailHtml;
+    showScreen('screen-result');
+}
 
     </script>
 </body>
 </html>
+

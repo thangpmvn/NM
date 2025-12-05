@@ -139,13 +139,42 @@
         .easy-mode .full-text { display: none; } .easy-mode .short-text { display: inline; }
         .hard-mode .full-text { display: inline; } .hard-mode .short-text { display: none; }
 
-        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; padding: 15px; text-align: center; font-size: 0.85rem; color: var(--text-sub); z-index: 90; }
+      /* --- CHỈNH SỬA PHẦN FOOTER --- */
+        .footer { 
+            position: fixed; /* Mặc định trên máy tính là ghim cố định */
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            background: white; 
+            border-top: 1px solid #e2e8f0; 
+            padding: 15px; 
+            text-align: center; 
+            font-size: 0.85rem; 
+            color: var(--text-sub); 
+            z-index: 90; 
+        }
 
+        /* --- CHỈNH SỬA GIAO DIỆN ĐIỆN THOẠI --- */
         @media (max-width: 600px) {
             .actions-grid { grid-template-columns: 1fr; }
             .header { flex-wrap: wrap; gap: 10px; }
             .search-box { order: 3; width: 100%; max-width: none; }
             .logo span { display: inline; }
+            
+            /* Sửa lỗi Footer trên điện thoại */
+            .footer {
+                position: static; /* Hủy chế độ ghim, để nó trôi xuống cuối trang */
+                width: 100%;
+                padding: 20px 10px; /* Giảm padding cho gọn */
+                background: #f8fafc; /* Màu nền nhẹ nhàng hơn */
+                border-top: 1px solid #e2e8f0;
+                margin-top: 30px; /* Cách xa nội dung một chút */
+            }
+            
+            /* Điều chỉnh body để không bị khoảng trắng thừa quá lớn ở dưới */
+            body { 
+                padding-bottom: 0; 
+            }
         }
         /* --- GAME UI ELEMENTS --- */
 /* Thanh tiến trình EXP */
@@ -5095,3 +5124,4 @@
 </body>
 
 </html>
+

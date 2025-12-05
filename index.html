@@ -147,11 +147,73 @@
             .search-box { order: 3; width: 100%; max-width: none; }
             .logo span { display: inline; }
         }
+        /* --- GAME UI ELEMENTS --- */
+/* Thanh tiến trình EXP */
+.game-hud {
+    background: linear-gradient(to right, #2c3e50, #4f46e5);
+    color: white; padding: 10px 20px; border-radius: 0 0 12px 12px;
+    margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.rank-badge { font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+.xp-bar-container { width: 150px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; position: relative; margin: 0 10px; }
+.xp-bar-fill { height: 100%; background: #fbbf24; width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px #fbbf24; }
+.streak-counter { font-weight: bold; color: #ff6b6b; display: flex; align-items: center; gap: 5px; animation: pulse 1.5s infinite; }
+
+/* Hiệu ứng sao trên card ngày */
+.star-rating { color: #cbd5e1; font-size: 0.85rem; margin-top: 5px; }
+.star-rating .filled { color: #fbbf24; }
+
+/* Animation khi trả lời */
+@keyframes pop { 50% { transform: scale(1.1); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.anim-pop { animation: pop 0.3s ease; }
+.anim-shake { animation: shake 0.4s ease; }
+
+/* Combo text bay lên */
+.combo-popup {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 3rem; font-weight: 900; color: #fbbf24; 
+    text-shadow: 2px 2px 0 #000; pointer-events: none; z-index: 999;
+    opacity: 0; transition: 0.5s;
+}
+.combo-active { animation: floatUp 1s ease-out forwards; }
+@keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -150%) scale(1.5); } }
+
+/* Pháo hoa đơn giản bằng CSS/JS */
+.confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 1000; }
+@keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+/* Điều chỉnh lại Day Card để hiển thị Sao */
+.day-card { border-left: 5px solid transparent; }
+.day-card.mastered { border-left-color: #fbbf24; background: linear-gradient(to right, #fff, #fffbeb); }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="header">
+        <div class="container" style="padding-bottom: 0;">
+    <div class="game-hud" id="gameHud">
+        <div style="display: flex; align-items: center;">
+            <i class="fa-solid fa-medal fa-2x" style="color: #fbbf24; margin-right: 10px;"></i>
+            <div>
+                <div class="rank-badge" id="playerRank">Tập Sự</div>
+                <div style="font-size: 0.75rem; opacity: 0.9;">LV.<span id="playerLevel">1</span></div>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 0.7rem; margin-bottom: 2px;">EXP Next Level</div>
+            <div class="xp-bar-container">
+                <div class="xp-bar-fill" id="xpBar"></div>
+            </div>
+            <div style="font-size: 0.7rem; margin-top: 2px;" id="xpText">0/100</div>
+        </div>
+        <div class="streak-counter" id="streakDisplay">
+            <i class="fa-solid fa-fire"></i> <span id="streakNum">0</span> Streak
+        </div>
+    </div>
+</div>
+<div id="comboEffect" class="combo-popup">COMBO x2!</div>
         <div class="logo" onclick="attemptGoHome()">
             <i class="fa-solid fa-graduation-cap"></i> <span>Ôn Thi Đấu Thầu</span>
         </div>
@@ -4755,6 +4817,280 @@
         function resetExam() {
             goHome();
         }
+        // --- [GAME ENGINE] ---
+    
+    // 1. Âm thanh (Base64 để không cần file ngoài)
+    const SOUNDS = {
+        correct: new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbqWE+PmCfutuni2NAVqzK4rOJYkZfosvluo9qS1qtyuK6kGtOXazK4biRbFBdrcriuZJsUV6tyuK5kWxRXq3K4rmRbFFercrium..."), // (Rút gọn để demo, tôi sẽ dùng hàm giả lập beep bên dưới cho gọn file)
+        wrong: null,
+        levelup: null
+    };
+
+    // Hàm tạo âm thanh beep đơn giản bằng Web Audio API (Nhẹ hơn Base64 dài)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type, duration) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playSound(type) {
+        if (type === 'correct') { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.2), 100); }
+        if (type === 'wrong') { playTone(150, 'sawtooth', 0.3); }
+        if (type === 'levelup') { 
+            playTone(400, 'square', 0.1); setTimeout(() => playTone(600, 'square', 0.1), 150); 
+            setTimeout(() => playTone(800, 'square', 0.4), 300); 
+        }
+    }
+
+    // 2. Quản lý trạng thái Game
+    let gameState = JSON.parse(localStorage.getItem('pmt_gamify_stats')) || {
+        xp: 0,
+        level: 1,
+        streak: 0,
+        maxStreak: 0,
+        dayStars: {} // { "1": 2, "2": 0 ... } (ID ngày: số sao)
+    };
+
+    const RANKS = [
+        { lv: 1, name: "Tập Sự", req: 0 },
+        { lv: 5, name: "Nhân Viên", req: 500 },
+        { lv: 10, name: "Chuyên Viên", req: 1500 },
+        { lv: 20, name: "Chuyên Gia", req: 4000 },
+        { lv: 30, name: "Bậc Thầy", req: 8000 },
+        { lv: 50, name: "Thần Thầu", req: 15000 }
+    ];
+
+    function saveGame() {
+        localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState));
+        updateHUD();
+    }
+
+    function getNextLevelXP(currentLv) {
+        return currentLv * 100 + (currentLv > 10 ? 500 : 0); // Công thức tính EXP
+    }
+
+    function addXP(amount) {
+        gameState.xp += amount;
+        const req = getNextLevelXP(gameState.level);
+        if (gameState.xp >= req) {
+            gameState.xp -= req;
+            gameState.level++;
+            playSound('levelup');
+            alert(`🎉 CHÚC MỪNG! Bạn đã thăng cấp ${gameState.level}\nDanh hiệu: ${getRankName()}`);
+            createConfetti();
+        }
+        saveGame();
+    }
+
+    function getRankName() {
+        let r = RANKS[0].name;
+        for (let rank of RANKS) {
+            if (gameState.level >= rank.lv) r = rank.name;
+        }
+        return r;
+    }
+
+    function updateHUD() {
+        const hud = document.getElementById('gameHud');
+        if(!hud) return;
+        
+        document.getElementById('playerLevel').innerText = gameState.level;
+        document.getElementById('playerRank').innerText = getRankName();
+        document.getElementById('streakNum').innerText = gameState.streak;
+        
+        const req = getNextLevelXP(gameState.level);
+        const pct = Math.min(100, (gameState.xp / req) * 100);
+        document.getElementById('xpBar').style.width = `${pct}%`;
+        document.getElementById('xpText').innerText = `${Math.floor(gameState.xp)}/${req} XP`;
+
+        renderDayStars(); // Cập nhật sao ở màn hình chính
+    }
+
+    function updateStreak(isCorrect) {
+        if (isCorrect) {
+            gameState.streak++;
+            if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+            // Hiệu ứng Combo
+            if (gameState.streak >= 2) {
+                const cmb = document.getElementById('comboEffect');
+                cmb.innerText = `COMBO x${gameState.streak}!`;
+                cmb.classList.remove('combo-active');
+                void cmb.offsetWidth; // trigger reflow
+                cmb.classList.add('combo-active');
+            }
+        } else {
+            gameState.streak = 0;
+        }
+        saveGame();
+    }
+
+    // 3. Hệ thống Sao (Đánh giá hoàn thành ngày)
+    function calculateStars(dayId, correctRatio) {
+        let stars = 0;
+        if (correctRatio >= 0.5) stars = 1;
+        if (correctRatio >= 0.8) stars = 2;
+        if (correctRatio >= 1.0) stars = 3;
+        
+        // Chỉ lưu nếu kết quả cao hơn cũ
+        const currentStars = gameState.dayStars[dayId] || 0;
+        if (stars > currentStars) {
+            gameState.dayStars[dayId] = stars;
+            if (stars === 3) createConfetti();
+            saveGame();
+        }
+    }
+
+    function renderDayStars() {
+        // Tìm các thẻ day-card để thêm sao
+        const cards = document.querySelectorAll('.day-card');
+        // Lưu ý: Code này giả định thứ tự thẻ Day Card khớp với thứ tự Ngày (1->8) trong renderHome
+        // Để chính xác hơn, ta sẽ sửa lại hàm renderHome một chút ở Bước 4.
+    }
+
+    // 4. Hiệu ứng Pháo hoa
+    function createConfetti() {
+        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+        for (let i = 0; i < 50; i++) {
+            const conf = document.createElement('div');
+            conf.classList.add('confetti');
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 4000);
+        }
+    }
+
+    // --- KẾT NỐI VÀO HÀM CŨ ---
+    
+    // Override hàm renderHome cũ để hiển thị sao
+    const oldRenderHome = renderHome;
+    renderHome = function() {
+        const grid = document.getElementById('dayGrid'); grid.innerHTML = '';
+        
+        // Render Review Box (Giữ nguyên logic cũ)
+        const wrongList = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+        if (wrongList.length > 0) {
+            const wCard = document.createElement('div'); wCard.className = 'day-card';
+            wCard.style.background = '#fff1f2'; wCard.style.borderColor = '#fda4af';
+            wCard.innerHTML = `<div class="day-header"><span class="day-badge" style="background:#e11d48; color:white;">Cần ôn lại</span><i class="fa-solid fa-triangle-exclamation" style="color: #e11d48;"></i></div><div class="day-title" style="color: #be123c;">Các câu làm sai</div><div class="day-info" style="color: #e11d48;"><i class="fa-solid fa-fire"></i> <b>${wrongList.length}</b> câu cần xử lý</div>`;
+            wCard.onclick = startReviewWrong; grid.appendChild(wCard);
+        }
+
+        // Render Days với Sao
+        Object.keys(DAY_TOPICS).forEach(day => {
+            const count = questionData.filter(q => q.day == day).length;
+            const stars = gameState.dayStars[day] || 0;
+            let starHtml = '';
+            for(let i=1; i<=3; i++) starHtml += `<i class="fa-solid fa-star ${i <= stars ? 'filled' : ''}"></i>`;
+
+            const card = document.createElement('div'); 
+            card.className = `day-card ${stars === 3 ? 'mastered' : ''}`;
+            card.innerHTML = `
+                <div class="day-header">
+                    <span class="day-badge">Ngày ${day}</span>
+                    <div class="star-rating">${starHtml}</div>
+                </div>
+                <div class="day-title">${DAY_TOPICS[day]}</div>
+                <div class="day-info">
+                    <span style="margin-right:10px"><i class="fa-solid fa-layer-group"></i> ${count} câu</span>
+                    ${stars === 3 ? '<span style="color:#d97706; font-weight:bold"><i class="fa-solid fa-crown"></i> Đã thuộc</span>' : ''}
+                </div>`;
+            card.onclick = () => openDaySetup(day); grid.appendChild(card);
+        });
+        renderResumeButton();
+        updateHUD(); // Cập nhật HUD ngay khi về Home
+    };
+
+    // Override hàm checkFlashcard để tính điểm
+    const oldCheckFlashcard = checkFlashcard;
+    checkFlashcard = function(el, isCorrect) {
+        if (el.classList.contains('disabled')) return;
+        
+        // Gọi logic cũ để xử lý UI cơ bản
+        // (Copy lại logic cũ vào đây để dễ kiểm soát hơn là gọi hàm cũ bị conflict biến)
+        const msg = document.getElementById('fc-msg');
+        const qId = currentQuestions[currentIdx].id;
+        
+        if (isCorrect) {
+            playSound('correct');
+            addXP(10 + (gameState.streak * 2)); // Thưởng combo
+            updateStreak(true);
+            
+            el.classList.add('correct', 'anim-pop'); 
+            msg.textContent = `Chính xác! (+${10 + (gameState.streak * 2)} XP)`; 
+            msg.style.color = "var(--success)";
+            markAsCorrect(qId);
+            el.parentElement.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+            setTimeout(nextCard, 1000); // Nhanh hơn chút (1s)
+        } else {
+            playSound('wrong');
+            updateStreak(false); // Reset combo
+            
+            el.classList.add('wrong', 'anim-shake'); 
+            msg.textContent = "Chưa đúng! (Mất chuỗi Combo)"; 
+            msg.style.color = "var(--danger)";
+            markAsWrong(qId);
+        }
+    };
+
+    // Override hàm submitExam để tính sao cho ngày
+    const oldSubmitExam = submitExam;
+    submitExam = function() {
+        // Logic cũ để tính điểm
+        isExamActive = false; 
+        clearInterval(timerInterval);
+        let correct = 0; let detail = '';
+        currentQuestions.forEach(q => {
+            const u = userAnswers[q.id]; const c = q.options.findIndex(o => o.correct);
+            const isR = u === c; if (isR) correct++;
+            detail += `<div class="q-card" style="border-left: 5px solid ${isR ? 'var(--success)' : 'var(--danger)'}"><div class="q-meta">Câu ${q.id} - ${isR ? '<span style="color:var(--success)">ĐÚNG</span>' : '<span style="color:var(--danger)">SAI</span>'}</div><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map((o, i) => `<div class="option disabled ${i === c ? 'correct' : (i === u ? 'wrong' : '')}"><div class="option-marker">${String.fromCharCode(65+i)}</div><div><span class="full-text">${o.text}</span><span class="short-text">${o.short || o.text}</span></div></div>`).join('')}</div></div>`;
+        });
+        
+        const scorePct = correct / currentQuestions.length;
+        const scoreDisplay = parseFloat((scorePct * 100).toFixed(1));
+        
+        // --- GAME LOGIC ---
+        // Tính sao cho ngày hiện tại (nếu đang thi theo ngày)
+        // Lưu ý: startExamMode cần biết đang thi ngày nào. 
+        // Ta giả định currentQuestions lấy từ selectedDay nếu ở màn hình setup ngày.
+        if (currentQuestions.length > 0 && currentQuestions[0].day == selectedDay) {
+             calculateStars(selectedDay, scorePct);
+        }
+        
+        // Thưởng XP lớn khi thi xong
+        const xpEarned = Math.floor(correct * 20 * (scorePct)); // Điểm càng cao hệ số càng lớn
+        addXP(xpEarned);
+        if (scorePct >= 0.8) playSound('levelup'); // Dùng âm thanh vui
+        // ------------------
+
+        const dScore = document.getElementById('score-display');
+        dScore.textContent = `${scoreDisplay}%`.replace('.',',');
+        dScore.style.color = scoreDisplay >= 50 ? 'var(--primary)' : 'var(--danger)';
+        
+        const oldM = document.getElementById('result-message'); if(oldM) oldM.remove();
+        const msg = document.createElement('div'); msg.id = 'result-message'; 
+        msg.innerHTML = scoreDisplay >= 50 
+            ? `Chúc mừng! Bạn nhận được <b>+${xpEarned} XP</b>` 
+            : `Cần cố gắng hơn! Bạn nhận được <b>+${xpEarned} XP</b> an ủi`;
+        msg.style.marginTop = "10px";
+        dScore.after(msg);
+        
+        document.getElementById('result-detail').innerHTML = detail;
+        showScreen('screen-result');
+    };
+
+    // Khởi chạy lần đầu
+    updateHUD();
     </script>
 </body>
 

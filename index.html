@@ -9,9 +9,9 @@
     
     <style>
         :root {
-            --primary: #4f46e5; /* Indigo 600 */
+            --primary: #4f46e5;
             --primary-hover: #4338ca;
-            --secondary: #64748b; /* Slate 500 */
+            --secondary: #64748b;
             --success: #10b981;
             --danger: #ef4444;
             --bg-body: #f1f5f9;
@@ -26,84 +26,100 @@
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { margin: 0; padding: 0; background: var(--bg-body); color: var(--text-main); line-height: 1.5; padding-bottom: 80px; }
         
-        /* Utility */
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
         .hidden { display: none !important; }
         .flex-center { display: flex; justify-content: center; align-items: center; }
         
-        /* Header */
+        /* --- [TÍNH NĂNG 1] HEADER MỚI CÓ TÌM KIẾM --- */
         .header {
             background: var(--bg-card);
-            padding: 15px 20px;
+            padding: 10px 20px;
             box-shadow: var(--shadow-sm);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid #e2e8f0;
+            gap: 15px;
         }
-        .logo { font-weight: 700; font-size: 1.25rem; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .logo { font-weight: 700; font-size: 1.2rem; color: var(--primary); display: flex; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer;}
         
-        /* Toggle Switch Styling */
-        .mode-wrapper { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 600; }
-        .switch { position: relative; display: inline-block; width: 48px; height: 24px; }
+        .search-box {
+            flex-grow: 1;
+            max-width: 400px;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 8px 35px 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1); }
+        .search-btn {
+            position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+            border: none; background: none; color: var(--secondary); cursor: pointer;
+        }
+        
+        .mode-wrapper { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(24px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
-        /* Screens Transition */
+        /* Screens */
         .screen { display: none; animation: slideIn 0.3s ease-out; }
         .screen.active { display: block; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* RANDOM QUESTION SECTION (HERO) */
+        /* Hero & Cards */
         .hero-section {
             background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-            color: white;
-            border-radius: var(--radius);
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-md);
-            position: relative;
-            overflow: hidden;
+            color: white; border-radius: var(--radius); padding: 30px; margin-bottom: 30px;
+            box-shadow: var(--shadow-md); position: relative; overflow: hidden;
         }
         .hero-bg-icon { position: absolute; right: -20px; bottom: -20px; font-size: 10rem; opacity: 0.1; transform: rotate(-15deg); }
         .hero-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
         .hero-subtitle { margin-bottom: 20px; opacity: 0.9; }
-        .random-card {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 20px;
-            border-radius: 8px;
-        }
+        .random-card { background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); padding: 20px; border-radius: 8px; }
 
-        /* GRID LAYOUTS */
         .section-title { font-size: 1.2rem; font-weight: 700; color: var(--text-main); margin: 30px 0 15px; border-left: 4px solid var(--primary); padding-left: 10px; }
-        
-        /* Day Cards */
         .days-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .day-card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            padding: 20px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            background: var(--bg-card); border-radius: var(--radius); padding: 20px;
+            border: 1px solid #e2e8f0; transition: all 0.2s; cursor: pointer; position: relative; overflow: hidden;
         }
         .day-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--primary); }
         .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .day-badge { background: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
-        .day-title { font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px; min-height: 50px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .day-title { font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 8px; }
         .day-info { font-size: 0.9rem; color: var(--text-sub); display: flex; align-items: center; gap: 5px; }
 
-        /* Action Buttons Grid */
+        /* Questions */
+        .q-card { background: var(--bg-card); border-radius: var(--radius); padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; }
+        .q-meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
+        .q-content { font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
+        
+        .easy-mode .keyword { background: #fef08a; color: #854d0e; padding: 2px 4px; border-radius: 4px; font-weight: 700; border-bottom: 2px solid #eab308; }
+        .hard-mode .keyword { background: transparent; color: inherit; font-weight: inherit; border: none; }
+
+        .option {
+            padding: 15px 20px; margin-bottom: 12px;
+            border: 2px solid #e2e8f0; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .option:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .option-marker { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; color: #cbd5e1; margin-top: 2px; }
+        .option.correct { background: #ecfdf5; border-color: var(--success); }
+        .option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; content: '✓'; }
+        .option.wrong { background: #fef2f2; border-color: var(--danger); }
+        .option.wrong .option-marker { background: var(--danger); border-color: var(--danger); color: white; content: '✕'; }
+        .option.disabled { pointer-events: none; opacity: 0.7; }
+
         .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
         .action-card {
             background: var(--bg-card); padding: 25px 15px; border-radius: var(--radius);
@@ -114,74 +130,44 @@
         .action-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
         .action-title { font-weight: 600; display: block; }
 
-        /* Question Card & Styles */
-        .q-card { background: var(--bg-card); border-radius: var(--radius); padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid #e2e8f0; }
-        .q-meta { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem; color: var(--text-sub); font-weight: 600; }
-        .q-content { font-size: 1.15rem; line-height: 1.6; margin-bottom: 25px; font-weight: 500; }
-        
-        /* Keywords Highlighting */
-        .easy-mode .keyword { background: #fef08a; color: #854d0e; padding: 2px 4px; border-radius: 4px; font-weight: 700; border-bottom: 2px solid #eab308; }
-        .hard-mode .keyword { background: transparent; color: inherit; font-weight: inherit; border: none; }
-
-        /* Answer Options */
-        .option {
-            padding: 15px 20px; margin-bottom: 12px;
-            border: 2px solid #e2e8f0; border-radius: 10px;
-            cursor: pointer; transition: all 0.2s;
-            display: flex; align-items: flex-start; gap: 10px;
-        }
-        .option:hover { background-color: #f8fafc; border-color: #cbd5e1; }
-        .option-marker { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: bold; color: #cbd5e1; margin-top: 2px; }
-        
-        /* Logic Styles */
-        .option.correct { background: #ecfdf5; border-color: var(--success); }
-        .option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; content: '✓'; }
-        
-        .option.wrong { background: #fef2f2; border-color: var(--danger); }
-        .option.wrong .option-marker { background: var(--danger); border-color: var(--danger); color: white; content: '✕'; }
-        
-        .option.disabled { pointer-events: none; opacity: 0.7; }
-
-        /* Buttons */
         .btn { border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
         .btn-outline { background: white; border: 1px solid #e2e8f0; color: var(--text-main); }
         .btn-outline:hover { background: #f1f5f9; }
-        .btn-danger { background: var(--danger); color: white; }
+        
+        .easy-mode .full-text { display: none; } .easy-mode .short-text { display: inline; }
+        .hard-mode .full-text { display: inline; } .hard-mode .short-text { display: none; }
 
-        /* Mode Visibility Control */
-        .easy-mode .full-text { display: none; }
-        .easy-mode .short-text { display: inline; }
-        .hard-mode .full-text { display: inline; }
-        .hard-mode .short-text { display: none; }
-
-        /* Footer */
         .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #e2e8f0; padding: 15px; text-align: center; font-size: 0.85rem; color: var(--text-sub); z-index: 90; }
 
-        /* Responsive */
         @media (max-width: 600px) {
             .actions-grid { grid-template-columns: 1fr; }
-            .header { padding: 10px 15px; }
-            .logo span { display: none; } /* Hide text logo on small mobile */
-            .logo:before { content: 'PMT'; }
+            .header { flex-wrap: wrap; gap: 10px; }
+            .search-box { order: 3; width: 100%; max-width: none; }
+            .logo span { display: inline; }
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <div class="header">
-        <div class="logo">
+        <div class="logo" onclick="attemptGoHome()">
             <i class="fa-solid fa-graduation-cap"></i> <span>Ôn Thi Đấu Thầu</span>
         </div>
         
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Tìm kiếm câu hỏi..." onkeypress="handleSearch(event)">
+            <button class="search-btn" onclick="executeSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+
         <div class="mode-wrapper">
-            <div id="modeText" style="color: var(--primary);">Easy Mode</div>
+            <div id="modeText" style="color: var(--primary);">Easy</div>
             <label class="switch">
                 <input type="checkbox" id="hardModeToggle">
                 <span class="slider"></span>
             </label>
-            <button class="btn btn-outline" style="padding: 8px 12px; font-size: 0.9rem;" onclick="goHome()">
+            <button class="btn btn-outline" style="padding: 6px 10px;" onclick="attemptGoHome()">
                 <i class="fa-solid fa-house"></i>
             </button>
         </div>
@@ -193,12 +179,11 @@
             
             <div class="hero-section">
                 <i class="fa-solid fa-lightbulb hero-bg-icon"></i>
-                <div class="hero-title">Chào mừng bạn đến với khóa ôn luật đấu thầu qua 340 câu trắc nghiệm</div>
-                <div class="hero-subtitle">Mỗi ngày một chút, kiến thức vững vàng. Thử ngay câu này nhé:</div>
+                <div class="hero-title">Chào mừng bạn đến với khóa ôn luật đấu thầu</div>
+                <div class="hero-subtitle">Mỗi ngày một chút, kiến thức vững vàng.</div>
                 
-                <div class="random-card" id="random-question-box">
-                    Loading...
-                </div>
+                <div class="random-card" id="random-question-box">Loading...</div>
+                
                 <div style="margin-top: 15px;">
                     <button class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid white;" onclick="renderRandomQuestion()">
                         <i class="fa-solid fa-shuffle"></i> Đổi câu khác
@@ -207,11 +192,20 @@
             </div>
 
             <div class="section-title">Chọn Ngày Ôn Tập</div>
-            <div class="days-grid" id="dayGrid">
-                </div>
+            <div class="days-grid" id="dayGrid"></div>
 
-            <div class="section-title">Thi Tổng Hợp</div>
-            <div class="day-card" style="background: linear-gradient(to right, #1e293b, #334155); color: white; border:none;" onclick="startMixedExam()">
+            <div class="section-title">Công Cụ & Thi Thử</div>
+            
+            <div class="day-card" onclick="showFullDatabase()">
+                <div class="day-header">
+                    <span class="day-badge" style="background: #e0e7ff; color: var(--primary);">Tra cứu</span>
+                    <i class="fa-solid fa-book-open" style="color: var(--primary);"></i>
+                </div>
+                <div class="day-title">Ngân hàng 340 câu hỏi (Toàn bộ)</div>
+                <div class="day-info">Xem danh sách đầy đủ theo thứ tự gốc</div>
+            </div>
+
+            <div class="day-card" style="margin-top: 15px; background: linear-gradient(to right, #1e293b, #334155); color: white; border:none;" onclick="startMixedExam()">
                 <div class="day-header">
                     <span class="day-badge" style="background: rgba(255,255,255,0.2); color: white;">Tổng hợp</span>
                     <i class="fa-solid fa-trophy" style="color: #f59e0b; font-size: 1.5rem;"></i>
@@ -224,15 +218,13 @@
         </div>
 
         <div id="screen-setup" class="screen">
-            <button class="btn btn-outline" onclick="goHome()" style="margin-bottom: 20px;">
+            <button class="btn btn-outline" onclick="attemptGoHome()" style="margin-bottom: 20px;">
                 <i class="fa-solid fa-arrow-left"></i> Quay lại
             </button>
-            
             <div style="text-align: center; margin-bottom: 30px;">
                 <h1 id="setup-title" style="color: var(--primary); margin-bottom: 10px;">Ngày 1</h1>
                 <p id="setup-topic" style="color: var(--text-sub); font-size: 1.1rem;"></p>
             </div>
-
             <div class="actions-grid">
                 <div class="action-card" onclick="startStudy('flashcard')">
                     <span class="action-icon" style="color: #f59e0b;">⚡</span>
@@ -254,12 +246,10 @@
 
         <div id="screen-flashcard" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <button class="btn btn-outline" onclick="backToSetup()"><i class="fa-solid fa-xmark"></i> Thoát</button>
+                <button class="btn btn-outline" onclick="attemptBackToSetup()"><i class="fa-solid fa-xmark"></i> Thoát</button>
                 <div style="font-weight: bold; color: var(--primary);" id="fc-progress">1/10</div>
             </div>
-            
             <div id="fc-container"></div>
-            
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px;">
                 <button class="btn btn-outline" onclick="prevCard()"><i class="fa-solid fa-arrow-left"></i> Câu trước</button>
                 <button class="btn btn-primary" onclick="nextCard()">Câu tiếp <i class="fa-solid fa-arrow-right"></i></button>
@@ -267,9 +257,9 @@
         </div>
 
         <div id="screen-list" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <button class="btn btn-outline" onclick="backToSetup()"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
-                <h2 style="margin:0; font-size: 1.2rem;">Danh sách câu hỏi</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: sticky; top: 60px; background: var(--bg-body); padding: 10px 0; z-index: 90;">
+                <button class="btn btn-outline" onclick="attemptBackToSetup()"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
+                <h2 id="list-title" style="margin:0; font-size: 1.1rem; text-align: right;">Danh sách câu hỏi</h2>
             </div>
             <div id="list-container"></div>
             <div class="flex-center" style="margin-top: 30px;">
@@ -278,10 +268,15 @@
         </div>
 
         <div id="screen-exam" class="screen">
-            <div style="position: sticky; top: 75px; z-index: 95; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="position: sticky; top: 65px; z-index: 95; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div style="font-weight: bold; color: var(--danger); font-size: 1.2rem;" id="exam-timer">00:00</div>
                 <div id="exam-progress" style="font-size: 0.9rem; color: var(--text-sub);">0/0</div>
                 <button class="btn btn-primary" style="padding: 8px 16px;" onclick="submitExam()">Nộp bài</button>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <button class="btn btn-outline btn-sm" onclick="attemptGoHome()" style="font-size: 0.85rem; color: var(--danger); border-color: var(--danger);">
+                    <i class="fa-solid fa-door-open"></i> Hủy bài thi & Thoát
+                </button>
             </div>
             <div id="exam-container"></div>
         </div>
@@ -292,7 +287,7 @@
                 <div id="score-display" style="font-size: 3.5rem; font-weight: 800; color: var(--primary); margin: 10px 0;">0/0</div>
                 <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
                     <button class="btn btn-outline" onclick="resetExam()">Làm lại bài này</button>
-                    <button class="btn btn-primary" onclick="goHome()">Về trang chủ</button>
+                    <button class="btn btn-primary" onclick="attemptGoHome()">Về trang chủ</button>
                 </div>
             </div>
             <div class="section-title">Chi tiết đáp án</div>
@@ -306,9 +301,6 @@
     </div>
 
     <script>
-        // =======================================================
-        // CẤU HÌNH CHỦ ĐỀ 8 NGÀY (Từ file CSV của bạn)
-        // =======================================================
         const DAY_TOPICS = {
             1: "Tổng quan & Luật chơi: Khái niệm, Phạm vi, Đối tượng, Bảo đảm cạnh tranh...",
             2: "Kế hoạch & Hình thức lựa chọn: Rộng rãi, Hạn chế, Chào hàng...",
@@ -320,12 +312,9 @@
             8: "Chuyên đề Đặc biệt: Mua sắm tập trung, Đàm phán giá, Thuốc, Quốc tế..."
         };
 
-        // =======================================================
-        // DỮ LIỆU CÂU HỎI (Bạn dán JSON 340 câu vào đây)
-        // =======================================================
+        // ⚠️⚠️⚠️ BẠN HÃY DÁN DỮ LIỆU 340 CÂU HỎI VÀO ĐÂY (Thay thế mảng rỗng này) ⚠️⚠️⚠️
         const questionData = [
-            // --- DỮ LIỆU MẪU ĐỂ TEST ---
-            {
+    {
         "id": 1,
         "day": 1,
         "original_question": "Câu 1: Trường hợp nào sau đây bắt buộc phải lựa chọn nhà thầu theo quy định tại Luật Đấu thầu?",
@@ -1225,16 +1214,16 @@
             { "text": "Hợp đồng tương tự được xác định trên cơ sở tương tự cả về tính chất và quy mô", "short": "Tương tự tính chất và quy mô", "correct": false }
         ]
     },
-    {
+{
         "id": 76,
         "day": 3,
-        "original_question": "Câu 76: Đối với gói thầu xây dựng “Trường trung học phổ thông A”... Kinh nghiệm thi công công trình tương tự được quy định trong hồ sơ mời thầu như thế nào là phù hợp?",
+        "original_question": "Câu 76: Đối với gói thầu xây dựng “Trường trung học phổ thông A”, bao gồm tổ hợp các công trình:<br>+ Nhà A1 (Nhà học): Cao 10 tầng, tổng diện tích sàn 8.000 m2, có giá trị theo dự toán được duyệt là (2X) VND. Nhà A1 là công trình kết cấu dạng nhà cấp II theo quy định.<br>+ Nhà A2 (Nhà học): Cao 6 tầng, tổng diện tích sàn 1.000 m2, có giá trị theo dự toán được duyệt là (Y) VND. Nhà A2 là công trình kết cấu dạng nhà cấp III theo quy định.<br>+ Hàng rào bảo vệ: Cao 3m; Nhà bảo vệ: Cao 1 tầng, diện tích sàn 12 m2.<br>Kinh nghiệm thi công công trình tương tự được quy định trong hồ sơ mời thầu như thế nào là phù hợp?",
         "short_question": "Kinh nghiệm <span class='keyword'>công trình tương tự</span> (Trường học gồm Nhà cấp II và III)?",
         "options": [
             { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II, có giá trị tối thiểu là 50% x (2X) VND", "short": "Nhà cấp II, giá trị >= <span class='keyword'>50% hạng mục cấp cao nhất</span>", "correct": true },
-            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II... phải bao gồm hạng mục hàng rào, nhà bảo vệ", "short": "Phải có hàng rào, nhà bảo vệ", "correct": false },
-            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III...", "short": "Nhà cấp III", "correct": false },
-            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III... bao gồm hàng rào...", "short": "Nhà cấp III + Hàng rào", "correct": false }
+            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp II, có giá trị tối thiểu là 50% x (2X) VND, trong đó phải bao gồm hạng mục hàng rào bảo vệ, nhà bảo vệ", "short": "Phải có hàng rào, nhà bảo vệ", "correct": false },
+            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III, có giá trị tối thiểu là 50% x (2X) VND", "short": "Nhà cấp III", "correct": false },
+            { "text": "Nhà thầu đã hoàn thành công trình xây dựng nhà, kết cấu dạng nhà cấp III, có giá trị tối thiểu là 50% x (2X) VND, trong đó phải bao gồm hạng mục hàng rào bảo vệ, nhà bảo vệ", "short": "Nhà cấp III + Hàng rào", "correct": false }
         ]
     },
     {
@@ -1252,16 +1241,15 @@
     {
         "id": 78,
         "day": 3,
-        "original_question": "Câu 78: Chủ đầu tư dự kiến mua sắm... Hàng hóa A (4 tỷ), Hàng hóa B (6 tỷ)... E-HSMT yêu cầu về kinh nghiệm thực hiện hợp đồng... tương tự...?",
-        "short_question": "Hàng A (4 tỷ), B (6 tỷ). Yêu cầu <span class='keyword'>hợp đồng tương tự</span>?",
+        "original_question": "Câu 78: Chủ đầu tư dự kiến mua sắm hàng hóa (không phải mua sắm tập trung hoặc mua sắm hàng hóa có số lượng, khối lượng mời thầu lớn) như sau:<br>- Hàng hóa A có mã HS là 9035, giá trị dự toán là 4.000.000.000 đồng<br>- Hàng hóa B có mã HS là 9035, giá trị dự toán là 6.000.000.000 đồng<br>E-HSMT yêu cầu về kinh nghiệm thực hiện hợp đồng cung cấp hàng hóa tương tự trong trường hợp nào sau đây là phù hợp?",
+        "short_question": "Hàng A (4 tỷ), B (6 tỷ) cùng mã HS 9035. Yêu cầu <span class='keyword'>hợp đồng tương tự</span>?",
         "options": [
             { "text": "Cung cấp 01 hợp đồng có mã hàng hóa 9035 với giá trị tối thiểu 02 tỷ đồng", "short": "02 tỷ", "correct": false },
             { "text": "Cung cấp 01 hợp đồng có mã hàng hóa 9035 với giá trị tối thiểu 03 tỷ đồng", "short": "<span class='keyword'>03 tỷ</span> (30% của 10 tỷ)", "correct": true },
             { "text": "Cung cấp 01 hợp đồng có mã hàng hóa 9035 với giá trị tối thiểu 05 tỷ đồng", "short": "05 tỷ", "correct": false },
             { "text": "Cung cấp 01 hợp đồng có mã hàng hóa 9035 với giá trị tối thiểu 07 tỷ đồng", "short": "07 tỷ", "correct": false }
         ]
-    },
-    {
+    },    {
         "id": 79,
         "day": 3,
         "original_question": "Câu 79: Gói thầu mua sắm hàng hóa... thời gian thực hiện gói thầu là 02 năm thì E-HSMT quy định về giá trị của hợp đồng tương tự như thế nào?",
@@ -1561,10 +1549,10 @@
             { "text": "Phương án A và C đều đúng", "short": "A và C", "correct": false }
         ]
     },
-    {
+{
         "id": 104,
         "day": 1,
-        "original_question": "Câu 104: Có 4 nhà thầu tham dự thầu... Nhà thầu A, B, C, D... Trong trường hợp tất cả nhà thầu đều đáp ứng về kỹ thuật thì nhà thầu nào được xét duyệt trúng thầu?",
+        "original_question": "Câu 104: Có 4 nhà thầu tham dự thầu gói thầu mua sắm hàng hóa áp dụng phương pháp giá thấp nhất, trong đó:<br>- Nhà thầu A, B, D là doanh nghiệp nhỏ và vừa do phụ nữ làm chủ.<br>- Nhà thầu A, B, C và D có giá dự thầu sau sửa lỗi, hiệu chỉnh sai lệch, trừ đi giá trị giảm giá lần lượt là: 95 tỷ đồng, 100 tỷ đồng, 100 tỷ đồng và 105 tỷ đồng.<br>- Nhà thầu A, B, C và D chứng minh được hàng hóa mình tham dự có tỷ lệ chi phí sản xuất trong nước lần lượt là: 20%, 40%, 45% và 60%.<br>Trong trường hợp tất cả nhà thầu đều đáp ứng về kỹ thuật thì nhà thầu nào được xét duyệt trúng thầu?",
         "short_question": "Bài toán xét duyệt trúng thầu (Ưu đãi <span class='keyword'>chi phí sản xuất trong nước</span>)?",
         "options": [
             { "text": "Nhà thầu A được xét duyệt trúng thầu", "short": "Nhà thầu A", "correct": false },
@@ -1681,15 +1669,15 @@
             { "text": "Tất cả đáp án trên đều đúng", "short": "<span class='keyword'>Tất cả</span> đúng (Tính phần đã nghiệm thu)", "correct": true }
         ]
     },
-    {
+{
         "id": 114,
         "day": 3,
-        "original_question": "Câu 114: Gói thầu mua sắm trang thiết bị... 03 tỷ đồng... máy điều hòa (1 tỷ), máy tính (2 tỷ), hợp đồng tương tự yêu cầu 50% giá gói thầu. Trường hợp nào sau đây nhà thầu được coi là không đáp ứng về giá trị của hợp đồng tương tự?",
+        "original_question": "Câu 114: Gói thầu mua sắm trang thiết bị do Sở Tư pháp tỉnh X làm chủ đầu tư có giá gói thầu 03 tỷ đồng, thời gian thực hiện là 12 tháng, trong đó có 02 hạng mục:<br>- Máy điều hòa (mã HS 8415) giá dự toán 01 tỷ đồng<br>- Máy tính xách tay (mã HS 8507) giá dự toán 02 tỷ đồng<br>Hợp đồng tương tự yêu cầu 50% giá gói thầu. Trường hợp nào sau đây nhà thầu được coi là không đáp ứng về giá trị của hợp đồng tương tự?",
         "short_question": "Trường hợp nào <span class='keyword'>không đáp ứng</span> HĐ tương tự (Gói hỗn hợp 3 tỷ)?",
         "options": [
-            { "text": "Nhà thầu cung cấp 02 hợp đồng, trong đó: 01 hợp đồng... 8415 với giá trị 400 triệu đồng, 01 hợp đồng... 8415... 100 triệu đồng và 8507... 01 tỷ đồng", "short": "Tổng giá trị 1.5 tỷ (Đủ tổng nhưng thiếu thành phần?)", "correct": true },
-            { "text": "Nhà thầu cung cấp 01 hợp đồng có đầy đủ các mã hàng hóa 8415 và 8507...", "short": "1 HĐ đủ mã", "correct": false },
-            { "text": "Nhà thầu cung cấp 02 hợp đồng...", "short": "2 HĐ", "correct": false },
+            { "text": "Nhà thầu cung cấp 02 hợp đồng, trong đó: 01 hợp đồng đã thực hiện việc cung cấp mã hàng hóa 8415 với giá trị 400 triệu đồng, 01 hợp đồng đã thực hiện việc cung cấp mã hàng hóa 8415 với giá trị 100 triệu đồng và mã hàng hóa 8507 với giá trị 01 tỷ đồng", "short": "Tổng giá trị 1.5 tỷ (Đủ tổng nhưng thiếu thành phần?)", "correct": true },
+            { "text": "Nhà thầu cung cấp 01 hợp đồng có đầy đủ các mã hàng hóa 8415 và 8507 và tổng giá trị của mã hàng hóa 8415, 8507 trong hợp đồng đã hoàn thành với giá trị 1,6 tỷ đồng", "short": "1 HĐ đủ mã", "correct": false },
+            { "text": "Nhà thầu cung cấp 02 hợp đồng, trong đó: 01 hợp đồng đã thực hiện việc cung cấp mã hàng hóa 8415 với giá trị 600 triệu đồng và 01 hợp đồng đã thực hiện việc cung cấp mã hàng hóa 8507 với giá trị 01 tỷ đồng", "short": "2 HĐ", "correct": false },
             { "text": "Phương án A và B đều không đáp ứng về giá trị hợp đồng tương tự", "short": "A và B không đáp ứng", "correct": false }
         ]
     },
@@ -3649,10 +3637,10 @@
             { "text": "Các phương án trên đều đúng", "short": "<span class='keyword'>Tất cả</span> đúng", "correct": true }
         ]
     },
-    {
+{
         "id": 278,
         "day": 4,
-        "original_question": "Câu 278: Gói thầu mua sắm hàng hóa có: - Thời điểm đóng thầu theo ETBMT là: 8h00 ngày 25/9/2025... Do lỗi hệ thống nên... gia hạn... 11h ngày 26/09/2025. Nhà thầu A nộp... hiệu lực 90 ngày kể từ 25/9. Nhà thầu B nộp... hiệu lực 90 ngày kể từ 26/9. Đánh giá BĐDT?",
+        "original_question": "Câu 278: Gói thầu mua sắm hàng hóa có:<br>- Thời điểm đóng thầu theo E-TBMT là: 8h00 ngày 25/9/2025<br>- Hiệu lực của bảo đảm dự thầu theo yêu cầu của E-HSMT là: 90 ngày<br>- Do lỗi hệ thống nên Hệ thống tự động gia hạn thời điểm đóng thầu mới là: 11h ngày 26/09/2025<br>Nhà thầu A đã nộp E-HSDT trước thời điểm Hệ thống xảy ra sự cố với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 25/9/2025;<br>Nhà thầu B nộp E-HSDT sau khi Hệ thống được khắc phục và trước thời điểm đóng thầu mới với hiệu lực của bảo đảm dự thầu là 90 ngày kể từ ngày 26/9/2025.<br>Trong trường hợp này, bảo đảm dự thầu của nhà thầu A và nhà thầu B được đánh giá như thế nào?",
         "short_question": "Sự cố hệ thống, Nhà thầu A (tính từ ngày cũ), Nhà thầu B (tính từ ngày mới). <span class='keyword'>Ai hợp lệ</span>?",
         "options": [
             { "text": "Bảo đảm dự thầu của nhà thầu A được đánh giá là không hợp lệ; Bảo đảm dự thầu của nhà thầu B được đánh giá là hợp lệ", "short": "A sai, B đúng", "correct": false },
@@ -4407,39 +4395,169 @@
     }
         ];
 
-        // =======================================================
-        // LOGIC CHƯƠNG TRÌNH
-        // =======================================================
+        // --- GLOBAL VARIABLES ---
         let currentQuestions = [];
         let currentIdx = 0;
         let userAnswers = {};
         let timerInterval;
         let selectedDay = 1;
-        let isExamMode = false;
+        let isReviewMode = false;
+        let sessionWrongList = []; // [TÍNH NĂNG 4] Biến tạm cho bảng ngẫu nhiên
+        let isExamActive = false;  // [TÍNH NĂNG 2] Cờ bảo vệ bài thi
 
-        document.addEventListener('DOMContentLoaded', () => {
-            renderHome();
-            renderRandomQuestion();
+        const STORAGE_KEY = 'pmt_bidding_progress';
+        const WRONG_KEY = 'pmt_wrong_ids';
 
-            // Toggle Mode Logic
-            document.getElementById('hardModeToggle').addEventListener('change', (e) => {
-                const container = document.getElementById('mainContainer');
-                const label = document.getElementById('modeText');
-                if (e.target.checked) {
-                    container.classList.remove('easy-mode');
-                    container.classList.add('hard-mode');
-                    label.textContent = "Hard Mode";
-                    label.style.fontWeight = "bold";
+        // --- NAVIGATION GUARD (BẢO VỆ BÀI THI) ---
+        function confirmExitExam() {
+            if (isExamActive) {
+                const confirmLeave = confirm("Bạn đang trong bài thi. Nếu thoát bây giờ, kết quả sẽ không được lưu. Bạn có chắc chắn muốn thoát không?");
+                if (!confirmLeave) return false;
+                isExamActive = false;
+                clearInterval(timerInterval);
+                return true;
+            }
+            return true;
+        }
+
+        function attemptGoHome() {
+            if (confirmExitExam()) {
+                goHome();
+            }
+        }
+
+        function attemptBackToSetup() {
+            if (confirmExitExam()) {
+                if (document.getElementById('screen-list').classList.contains('active') && document.getElementById('list-title').innerText.includes("Tìm kiếm")) {
+                    goHome(); 
+                } else if (document.getElementById('screen-list').classList.contains('active') && document.getElementById('list-title').innerText.includes("Toàn bộ")) {
+                    goHome();
+                } else if (isReviewMode) {
+                    goHome();
                 } else {
-                    container.classList.remove('hard-mode');
-                    container.classList.add('easy-mode');
-                    label.textContent = "Easy Mode";
-                    label.style.fontWeight = "normal";
+                    showScreen('screen-setup');
                 }
+            }
+        }
+
+        window.onbeforeunload = function (e) {
+            if (isExamActive) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+
+        // --- [TÍNH NĂNG 1] SEARCH FUNCTION ---
+        function handleSearch(e) {
+            if (e.key === 'Enter') executeSearch();
+        }
+
+        function executeSearch() {
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!keyword) {
+                alert("Vui lòng nhập từ khóa!");
+                return;
+            }
+            const results = questionData.filter(q => 
+                q.original_question.toLowerCase().includes(keyword) || 
+                q.short_question.toLowerCase().includes(keyword) ||
+                q.id.toString() === keyword
+            );
+            if (results.length === 0) {
+                alert("Không tìm thấy câu hỏi nào chứa từ khóa này.");
+                return;
+            }
+            currentQuestions = results;
+            showScreen('screen-list');
+            document.getElementById('list-title').textContent = `Kết quả tìm kiếm: "${keyword}" (${results.length} câu)`;
+            renderList();
+        }
+
+        // --- [TÍNH NĂNG 3] FULL LIST FUNCTION ---
+        function showFullDatabase() {
+            currentQuestions = [...questionData].sort((a, b) => a.id - b.id);
+            showScreen('screen-list');
+            document.getElementById('list-title').textContent = `Ngân hàng câu hỏi (Toàn bộ ${currentQuestions.length} câu)`;
+            renderList();
+        }
+
+        // --- STORAGE & LOGIC ---
+        function saveProgress() {
+            if (isReviewMode || isExamActive) return;
+            const progress = { day: selectedDay, index: currentIdx, timestamp: new Date().getTime() };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+        }
+
+        function resumeLearning() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (!savedData) return;
+            const progress = JSON.parse(savedData);
+            selectedDay = progress.day;
+            currentIdx = progress.index;
+            isReviewMode = false;
+            currentQuestions = questionData.filter(q => q.day == selectedDay);
+            if(currentQuestions.length === 0) { alert("Dữ liệu lỗi."); return; }
+            
+            document.getElementById('setup-title').textContent = `Ôn tập Ngày ${selectedDay}`;
+            document.getElementById('setup-topic').textContent = DAY_TOPICS[selectedDay];
+            showScreen('screen-flashcard');
+            renderFlashcard();
+        }
+
+        function renderResumeButton() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            const heroSection = document.querySelector('.hero-section');
+            const oldBtn = document.getElementById('resume-btn-container');
+            if (oldBtn) oldBtn.remove();
+
+            if (savedData) {
+                const progress = JSON.parse(savedData);
+                const btnHTML = `
+                    <div id="resume-btn-container" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 15px;">
+                        <div style="margin-bottom: 10px; font-size: 0.9rem;">
+                            <i class="fa-solid fa-history"></i> Bạn đang học dở <b>Ngày ${progress.day}</b> (Câu ${progress.index + 1})
+                        </div>
+                        <button class="btn" style="background: white; color: var(--primary); font-weight:bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="resumeLearning()">
+                            <i class="fa-solid fa-play"></i> Tiếp tục học ngay
+                        </button>
+                    </div>`;
+                heroSection.insertAdjacentHTML('beforeend', btnHTML);
+            }
+        }
+
+        function markAsWrong(id) {
+            let list = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+            if (!list.includes(id)) { list.push(id); localStorage.setItem(WRONG_KEY, JSON.stringify(list)); }
+        }
+        function markAsCorrect(id) {
+            let list = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+            list = list.filter(item => item !== id);
+            localStorage.setItem(WRONG_KEY, JSON.stringify(list));
+        }
+        function startReviewWrong() {
+            let list = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+            if (list.length === 0) { alert("Không có câu sai để ôn."); return; }
+            currentQuestions = questionData.filter(q => list.includes(q.id));
+            currentIdx = 0; isReviewMode = true;
+            showScreen('screen-flashcard'); renderFlashcard();
+        }
+
+        // --- CORE UI FUNCTIONS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // [TÍNH NĂNG 4] Nạp danh sách câu sai vào biến tạm
+            const storedWrongs = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+            sessionWrongList = storedWrongs.filter(id => questionData.some(q => q.id == id));
+
+            renderHome(); renderRandomQuestion();
+            document.getElementById('hardModeToggle').addEventListener('change', (e) => {
+                const c = document.getElementById('mainContainer');
+                const l = document.getElementById('modeText');
+                if (e.target.checked) { c.classList.replace('easy-mode','hard-mode'); l.textContent="Hard"; l.style.fontWeight="bold"; }
+                else { c.classList.replace('hard-mode','easy-mode'); l.textContent="Easy"; l.style.fontWeight="normal"; }
             });
         });
 
-        // Navigation
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -4447,374 +4565,183 @@
         }
 
         function goHome() {
-            clearInterval(timerInterval);
-            showScreen('screen-home');
-            // Refresh random question when going home
-            renderRandomQuestion(); 
+            isExamActive = false; clearInterval(timerInterval); isReviewMode = false;
+            showScreen('screen-home'); renderHome(); renderRandomQuestion();
+            document.getElementById('searchInput').value = '';
         }
 
-        function backToSetup() {
-            showScreen('screen-setup');
-        }
-
-        // --- HOMEPAGE ---
         function renderHome() {
-            const grid = document.getElementById('dayGrid');
-            grid.innerHTML = '';
-
-            // Tạo danh sách 8 ngày dựa trên config DAY_TOPICS
+            const grid = document.getElementById('dayGrid'); grid.innerHTML = '';
+            // Render Review Button
+            const wrongList = JSON.parse(localStorage.getItem(WRONG_KEY)) || [];
+            if (wrongList.length > 0) {
+                const wCard = document.createElement('div'); wCard.className = 'day-card';
+                wCard.style.background = '#fff1f2'; wCard.style.borderColor = '#fda4af';
+                wCard.innerHTML = `<div class="day-header"><span class="day-badge" style="background:#e11d48; color:white;">Cần ôn lại</span><i class="fa-solid fa-triangle-exclamation" style="color: #e11d48;"></i></div><div class="day-title" style="color: #be123c;">Các câu làm sai</div><div class="day-info" style="color: #e11d48;"><i class="fa-solid fa-fire"></i> <b>${wrongList.length}</b> câu cần xử lý</div>`;
+                wCard.onclick = startReviewWrong; grid.appendChild(wCard);
+            }
+            // Render Days
             Object.keys(DAY_TOPICS).forEach(day => {
                 const count = questionData.filter(q => q.day == day).length;
-                const topic = DAY_TOPICS[day];
-                
-                const card = document.createElement('div');
-                card.className = 'day-card';
-                card.innerHTML = `
-                    <div class="day-header">
-                        <span class="day-badge">Ngày ${day}</span>
-                        <i class="fa-regular fa-folder-open" style="color: var(--secondary);"></i>
-                    </div>
-                    <div class="day-title">${topic}</div>
-                    <div class="day-info">
-                        <i class="fa-solid fa-layer-group"></i> ${count} câu hỏi
-                    </div>
-                `;
-                card.onclick = () => openDaySetup(day);
-                grid.appendChild(card);
+                const card = document.createElement('div'); card.className = 'day-card';
+                card.innerHTML = `<div class="day-header"><span class="day-badge">Ngày ${day}</span><i class="fa-regular fa-folder-open" style="color: var(--secondary);"></i></div><div class="day-title">${DAY_TOPICS[day]}</div><div class="day-info"><i class="fa-solid fa-layer-group"></i> ${count} câu hỏi</div>`;
+                card.onclick = () => openDaySetup(day); grid.appendChild(card);
             });
+            renderResumeButton();
         }
 
+        // [TÍNH NĂNG 4] Bảng ngẫu nhiên thông minh
         function renderRandomQuestion() {
             const container = document.getElementById('random-question-box');
-            if(questionData.length === 0) {
-                container.innerHTML = "Chưa có dữ liệu câu hỏi.";
-                return;
+            if(questionData.length === 0) { container.innerHTML = "Chưa có dữ liệu câu hỏi."; return; }
+
+            let randomQ = null;
+            let isPrioritized = false;
+
+            if (sessionWrongList.length > 0) {
+                const randIdx = Math.floor(Math.random() * sessionWrongList.length);
+                const wrongId = sessionWrongList[randIdx];
+                randomQ = questionData.find(q => q.id == wrongId);
+                sessionWrongList.splice(randIdx, 1);
+                isPrioritized = true;
+            } else {
+                randomQ = questionData[Math.floor(Math.random() * questionData.length)];
+                isPrioritized = false;
             }
-            
-            const randomQ = questionData[Math.floor(Math.random() * questionData.length)];
+
             const correctOpt = randomQ.options.find(o => o.correct);
-            
-            // Ở Home, hiển thị câu hỏi và đáp án đúng luôn để học nhanh
             container.innerHTML = `
-                <div style="font-weight: 700; margin-bottom: 5px;">${randomQ.short_question}</div>
-                <div style="color: #cbd5e1; font-size: 0.9rem;">
-                    <i class="fa-solid fa-check" style="color: var(--success);"></i> Đáp án: ${correctOpt ? (correctOpt.short || correctOpt.text) : 'N/A'}
+                <div style="margin-bottom: 8px;">
+                    ${isPrioritized 
+                        ? '<span style="background:#fecaca; color:#dc2626; font-size:0.75rem; padding:2px 8px; border-radius:4px; font-weight:bold; border:1px solid #fca5a5;">🔥 Cần ôn lại</span>' 
+                        : '<span style="background:rgba(255,255,255,0.2); font-size:0.75rem; padding:2px 8px; border-radius:4px;">🎲 Ngẫu nhiên</span>'}
+                </div>
+                <div style="font-weight: 700; margin-bottom: 5px; font-size: 1.1rem;">${randomQ.short_question}</div>
+                <div style="color: #cbd5e1; font-size: 0.95rem; margin-top: 10px; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 10px;">
+                    <i class="fa-solid fa-check" style="color: #4ade80;"></i> Đáp án: <b>${correctOpt ? (correctOpt.short || correctOpt.text) : 'N/A'}</b>
                 </div>
             `;
         }
 
-        // --- SETUP SCREEN ---
         function openDaySetup(day) {
-            selectedDay = day;
+            selectedDay = day; isReviewMode = false;
             document.getElementById('setup-title').textContent = `Ôn tập Ngày ${day}`;
             document.getElementById('setup-topic').textContent = DAY_TOPICS[day];
             showScreen('screen-setup');
         }
 
-        // --- STUDY LOGIC ---
         function startStudy(mode) {
             currentQuestions = questionData.filter(q => q.day == selectedDay);
-            if(currentQuestions.length === 0) {
-                alert("Chưa có dữ liệu cho ngày này!");
-                return;
-            }
+            if(currentQuestions.length === 0) { alert("Chưa có dữ liệu!"); return; }
             currentIdx = 0;
-
-            if (mode === 'flashcard') {
-                showScreen('screen-flashcard');
-                renderFlashcard();
-            } else {
-                showScreen('screen-list');
-                renderList();
-            }
+            if (mode === 'flashcard') { showScreen('screen-flashcard'); renderFlashcard(); }
+            else { showScreen('screen-list'); document.getElementById('list-title').textContent = `Danh sách Ngày ${selectedDay}`; renderList(); }
         }
 
-        // Flashcard
+        // --- FLASHCARD ---
         function renderFlashcard() {
             const q = currentQuestions[currentIdx];
-            document.getElementById('fc-progress').textContent = `Câu ${currentIdx + 1}/${currentQuestions.length}`;
+            let pText = `Câu ${currentIdx + 1}/${currentQuestions.length}`;
+            if (isReviewMode) pText += " (Đang ôn lại)";
+            document.getElementById('fc-progress').textContent = pText;
             
-            const html = `
-                <div class="q-card">
-                    <div class="q-meta">Câu ID: ${q.id} • Ngày ${q.day}</div>
-                    <div class="q-content">
-                        <span class="full-text">${q.original_question}</span>
-                        <span class="short-text">${q.short_question}</span>
-                    </div>
-                    <div>
-                        ${q.options.map(opt => `
-                            <div class="option" onclick="checkFlashcard(this, ${opt.correct})">
-                                <div class="option-marker">?</div>
-                                <div>
-                                    <span class="full-text">${opt.text}</span>
-                                    <span class="short-text">${opt.short || opt.text}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div id="fc-msg" style="margin-top: 15px; font-weight: bold; min-height: 24px;"></div>
-                </div>
-            `;
+            const html = `<div class="q-card"><div class="q-meta">Câu ID: ${q.id} ${isReviewMode ? '<span style="color:var(--danger)">[Ôn tập]</span>' : `• Ngày ${q.day}`}</div><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map(opt => `<div class="option" onclick="checkFlashcard(this, ${opt.correct})"><div class="option-marker">?</div><div><span class="full-text">${opt.text}</span><span class="short-text">${opt.short || opt.text}</span></div></div>`).join('')}</div><div id="fc-msg" style="margin-top: 15px; font-weight: bold; min-height: 24px;"></div></div>`;
             document.getElementById('fc-container').innerHTML = html;
         }
 
         function checkFlashcard(el, isCorrect) {
             if (el.classList.contains('disabled')) return;
-            
-            const options = el.parentElement.querySelectorAll('.option');
             const msg = document.getElementById('fc-msg');
-
+            const qId = currentQuestions[currentIdx].id;
             if (isCorrect) {
-                el.classList.add('correct');
-                msg.textContent = "Chính xác! Tự động chuyển câu...";
-                msg.style.color = "var(--success)";
-                options.forEach(o => o.classList.add('disabled'));
+                el.classList.add('correct'); msg.textContent = "Chính xác!"; msg.style.color = "var(--success)";
+                markAsCorrect(qId);
+                el.parentElement.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
                 setTimeout(nextCard, 1200);
             } else {
-                el.classList.add('wrong');
-                msg.textContent = "Chưa đúng, hãy thử lại!";
-                msg.style.color = "var(--danger)";
+                el.classList.add('wrong'); msg.textContent = "Chưa đúng! (Đã lưu vào danh sách câu sai)"; msg.style.color = "var(--danger)";
+                markAsWrong(qId);
             }
         }
-
         function nextCard() {
-            if (currentIdx < currentQuestions.length - 1) {
-                currentIdx++;
-                renderFlashcard();
-            } else {
-                alert("Đã hết câu hỏi trong ngày này!");
-            }
+            if (currentIdx < currentQuestions.length - 1) { currentIdx++; saveProgress(); renderFlashcard(); }
+            else { alert("Đã hết câu hỏi!"); if (isReviewMode) goHome(); }
         }
         function prevCard() {
-            if (currentIdx > 0) {
-                currentIdx--;
-                renderFlashcard();
-            }
+            if (currentIdx > 0) { currentIdx--; saveProgress(); renderFlashcard(); }
         }
 
-        // List View
+        // --- LIST VIEW ---
         function renderList() {
-            const container = document.getElementById('list-container');
-            container.innerHTML = currentQuestions.map(q => `
-                <div class="q-card">
-                    <div class="q-meta">Câu ${q.id}</div>
-                    <div class="q-content">
-                         <span class="full-text">${q.original_question}</span>
-                         <span class="short-text">${q.short_question}</span>
-                    </div>
-                    <div>
-                         ${q.options.map(opt => `
-                            <div class="option ${opt.correct ? 'correct' : ''}" style="cursor: default; pointer-events: none;">
-                                <div class="option-marker">${opt.correct ? '✓' : ''}</div>
-                                <div>
-                                    <span class="full-text">${opt.text}</span>
-                                    <span class="short-text">${opt.short || opt.text}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
+            const div = document.getElementById('list-container');
+            div.innerHTML = currentQuestions.map(q => `<div class="q-card"><div class="q-meta">Câu ${q.id} (Ngày ${q.day})</div><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map(opt => `<div class="option ${opt.correct ? 'correct' : ''}" style="cursor: default; pointer-events: none;"><div class="option-marker">${opt.correct ? '✓' : ''}</div><div><span class="full-text">${opt.text}</span><span class="short-text">${opt.short || opt.text}</span></div></div>`).join('')}</div></div>`).join('');
         }
 
-        // --- EXAM LOGIC ---
+        // --- EXAM ---
         function startDailyExam() {
-            const questions = questionData.filter(q => q.day == selectedDay);
-            if(questions.length === 0) { alert("Chưa có dữ liệu!"); return; }
-            startExamMode(questions, 15 * 60); // 15 phút
+            const q = questionData.filter(q => q.day == selectedDay);
+            if(q.length === 0) { alert("Chưa có dữ liệu!"); return; }
+            startExamMode(q, 15 * 60);
         }
-
         function startMixedExam() {
-            // Random 70 câu
-            if(questionData.length < 70) {
-                alert("Cần nạp đủ dữ liệu để thi tổng hợp (Hiện có " + questionData.length + " câu). Sẽ thi với toàn bộ câu hỏi hiện có.");
-            }
-            const shuffled = [...questionData].sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, 70);
-            startExamMode(selected, 40 * 60); // 40 phút
+            if(questionData.length < 70) alert("Cảnh báo: Dữ liệu ít hơn 70 câu.");
+            const s = [...questionData].sort(() => 0.5 - Math.random()).slice(0, 70);
+            startExamMode(s, 40 * 60);
         }
-
-        function startExamMode(questions, time) {
-            currentQuestions = questions;
-            userAnswers = {};
+        function startExamMode(q, t) {
+            currentQuestions = q; userAnswers = {};
+            isExamActive = true; 
             showScreen('screen-exam');
-            renderExamList();
-            runTimer(time);
+            renderExamList(); runTimer(t);
         }
-
         function renderExamList() {
-            const container = document.getElementById('exam-container');
-            container.innerHTML = currentQuestions.map((q, idx) => `
-                <div class="q-card" id="exam-q-${q.id}">
-                    <div class="q-meta">Câu hỏi ${idx + 1}</div>
-                    <div class="q-content">
-                        <span class="full-text">${q.original_question}</span>
-                        <span class="short-text">${q.short_question}</span>
-                    </div>
-                    <div>
-                        ${q.options.map((opt, optIdx) => `
-                            <div class="option" onclick="selectExamOpt(${q.id}, ${optIdx}, this)">
-                                <div class="option-marker">${String.fromCharCode(65+optIdx)}</div>
-                                <div>
-                                    <span class="full-text">${opt.text}</span>
-                                    <span class="short-text">${opt.short || opt.text}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
+            document.getElementById('exam-container').innerHTML = currentQuestions.map((q, i) => `<div class="q-card" id="exam-q-${q.id}"><div class="q-meta">Câu hỏi ${i + 1}</div><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map((opt, oi) => `<div class="option" onclick="selectExamOpt(${q.id}, ${oi}, this)"><div class="option-marker">${String.fromCharCode(65+oi)}</div><div><span class="full-text">${opt.text}</span><span class="short-text">${opt.short || opt.text}</span></div></div>`).join('')}</div></div>`).join('');
             updateExamProgress();
         }
-
-        function selectExamOpt(qId, optIdx, el) {
-            userAnswers[qId] = optIdx;
-            // UI Styling
-            const parent = el.parentElement;
-            parent.querySelectorAll('.option').forEach(o => {
-                o.style.background = ''; o.style.borderColor = '#e2e8f0';
-                o.querySelector('.option-marker').style.background = '';
-                o.querySelector('.option-marker').style.color = '#cbd5e1';
-            });
-            
-            el.style.background = '#eff6ff';
-            el.style.borderColor = 'var(--primary)';
-            const marker = el.querySelector('.option-marker');
-            marker.style.background = 'var(--primary)';
-            marker.style.color = 'white';
-            
+        function selectExamOpt(qid, oid, el) {
+            userAnswers[qid] = oid;
+            el.parentElement.querySelectorAll('.option').forEach(o => { o.style.background=''; o.style.borderColor='#e2e8f0'; o.querySelector('.option-marker').style.background=''; o.querySelector('.option-marker').style.color='#cbd5e1'; });
+            el.style.background='#eff6ff'; el.style.borderColor='var(--primary)';
+            const m = el.querySelector('.option-marker'); m.style.background='var(--primary)'; m.style.color='white';
             updateExamProgress();
         }
-
         function updateExamProgress() {
-            const count = Object.keys(userAnswers).length;
-            document.getElementById('exam-progress').textContent = `${count}/${currentQuestions.length} đã làm`;
+            document.getElementById('exam-progress').textContent = `${Object.keys(userAnswers).length}/${currentQuestions.length} đã làm`;
         }
-
-        function runTimer(seconds) {
+        function runTimer(s) {
             clearInterval(timerInterval);
-            const display = document.getElementById('exam-timer');
-            let remain = seconds;
-            
+            const d = document.getElementById('exam-timer');
+            let r = s;
             timerInterval = setInterval(() => {
-                remain--;
-                const m = Math.floor(remain / 60);
-                const s = remain % 60;
-                display.textContent = `${m}:${s < 10 ? '0'+s : s}`;
-                
-                if (remain <= 0) {
-                    clearInterval(timerInterval);
-                    submitExam();
-                }
+                r--; d.textContent = `${Math.floor(r/60)}:${(r%60)<10?'0'+(r%60):r%60}`;
+                if (r <= 0) { clearInterval(timerInterval); submitExam(); }
             }, 1000);
         }
-
         function submitExam() {
-    clearInterval(timerInterval);
-    let correct = 0;
-    let detailHtml = '';
-    
-    // 1. Tính số câu đúng và tạo HTML chi tiết
-    currentQuestions.forEach((q, idx) => {
-        const userPick = userAnswers[q.id];
-        const correctIdx = q.options.findIndex(o => o.correct);
-        const isRight = userPick === correctIdx;
-        if (isRight) correct++;
-        
-        detailHtml += `
-            <div class="q-card" style="border-left: 5px solid ${isRight ? 'var(--success)' : 'var(--danger)'}">
-                <div class="q-meta">Câu ${q.id} - ${isRight ? '<span style="color:var(--success)">ĐÚNG</span>' : '<span style="color:var(--danger)">SAI</span>'}</div>
-                <div class="q-content">
-                        <span class="full-text">${q.original_question}</span>
-                        <span class="short-text">${q.short_question}</span>
-                </div>
-                <div>
-                    ${q.options.map((opt, oIdx) => {
-                        let styleClass = "option disabled";
-                        if (oIdx === correctIdx) styleClass += " correct";
-                        if (oIdx === userPick && !opt.correct) styleClass += " wrong";
-                        
-                        return `<div class="${styleClass}">
-                            <div class="option-marker">${String.fromCharCode(65+oIdx)}</div>
-                            <div>
-                                <span class="full-text">${opt.text}</span>
-                                <span class="short-text">${opt.short || opt.text}</span>
-                            </div>
-                        </div>`;
-                    }).join('')}
-                </div>
-            </div>
-        `;
-    });
-
-    // 2. Tính toán phần trăm điểm số
-    let totalQuestions = currentQuestions.length;
-    let scorePercent = 0;
-
-    if (totalQuestions > 0) {
-        scorePercent = (correct / totalQuestions) * 100;
-    }
-
-    // Làm tròn 1 số thập phân (ví dụ 6.7)
-    let finalScore = parseFloat(scorePercent.toFixed(1));
-    // Đổi dấu chấm thành dấu phẩy cho đúng chuẩn Việt Nam (6.7 -> 6,7)
-    let displayScore = finalScore.toString().replace('.', ',');
-
-    // 3. Xử lý Logic hiển thị (Màu sắc & Lời nhắn)
-    const scoreDisplay = document.getElementById('score-display');
-    let messageHtml = "";
-    let colorStyle = "";
-
-    // Xóa các thông báo cũ nếu có để tránh bị lặp
-    const oldMsg = document.getElementById('result-message');
-    if (oldMsg) oldMsg.remove();
-    const oldSub = document.getElementById('score-sub-text');
-    if (oldSub) oldSub.remove();
-
-    if (finalScore >= 50) {
-        // TRƯỜNG HỢP ĐẬU (>= 50%) -> Màu Xanh (dùng var(--primary) hoặc var(--success))
-        colorStyle = "var(--primary)"; 
-        scoreDisplay.textContent = `${displayScore}%`; 
-        messageHtml = `Chúc mừng bạn đã đạt ${displayScore}%`;
-    } else {
-        // TRƯỜNG HỢP TRƯỢT (< 50%) -> Màu Đỏ
-        colorStyle = "var(--danger)";
-        scoreDisplay.textContent = `${displayScore}%`;
-        messageHtml = "Bạn hãy ôn luyện để đạt kết quả tốt hơn";
-    }
-
-    // Áp dụng màu cho số điểm to
-    scoreDisplay.style.color = colorStyle;
-
-    // 4. Tạo các dòng thông báo chèn vào dưới điểm số
-    
-    // Dòng thông báo (Chúc mừng/Ôn luyện)
-    const msgDiv = document.createElement('div');
-    msgDiv.id = 'result-message';
-    msgDiv.style.fontSize = "1.2rem";
-    msgDiv.style.fontWeight = "700";
-    msgDiv.style.margin = "10px 0";
-    msgDiv.style.color = colorStyle; // Màu chữ theo điểm
-    msgDiv.textContent = messageHtml;
-
-    // Dòng chi tiết (Số câu đúng)
-    const subDiv = document.createElement('div');
-    subDiv.id = 'score-sub-text';
-    subDiv.style.fontSize = "1rem";
-    subDiv.style.color = "var(--text-sub)";
-    subDiv.style.marginBottom = "20px";
-    subDiv.innerHTML = `(Bạn làm đúng <b>${correct}/${totalQuestions}</b> câu)`;
-
-    // Chèn vào giao diện (sau số điểm to)
-    scoreDisplay.after(subDiv); // Chèn dòng số câu xuống dưới cùng
-    scoreDisplay.after(msgDiv); // Chèn dòng thông báo vào giữa điểm và số câu
-
-    // Hiển thị màn hình kết quả
-    document.getElementById('result-detail').innerHTML = detailHtml;
-    showScreen('screen-result');
-}
-
+            isExamActive = false; 
+            clearInterval(timerInterval);
+            let correct = 0; let detail = '';
+            currentQuestions.forEach(q => {
+                const u = userAnswers[q.id]; const c = q.options.findIndex(o => o.correct);
+                const isR = u === c; if (isR) correct++;
+                detail += `<div class="q-card" style="border-left: 5px solid ${isR ? 'var(--success)' : 'var(--danger)'}"><div class="q-meta">Câu ${q.id} - ${isR ? '<span style="color:var(--success)">ĐÚNG</span>' : '<span style="color:var(--danger)">SAI</span>'}</div><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map((o, i) => `<div class="option disabled ${i === c ? 'correct' : (i === u ? 'wrong' : '')}"><div class="option-marker">${String.fromCharCode(65+i)}</div><div><span class="full-text">${o.text}</span><span class="short-text">${o.short || o.text}</span></div></div>`).join('')}</div></div>`;
+            });
+            
+            const score = parseFloat(((correct/currentQuestions.length)*100).toFixed(1));
+            const dScore = document.getElementById('score-display');
+            dScore.textContent = `${score}%`.replace('.',',');
+            dScore.style.color = score >= 50 ? 'var(--primary)' : 'var(--danger)';
+            
+            const oldM = document.getElementById('result-message'); if(oldM) oldM.remove();
+            const msg = document.createElement('div'); msg.id = 'result-message'; msg.style.fontWeight='700'; msg.style.color=dScore.style.color; msg.textContent = score >= 50 ? `Chúc mừng bạn!` : `Cần cố gắng hơn!`;
+            dScore.after(msg);
+            
+            document.getElementById('result-detail').innerHTML = detail;
+            showScreen('screen-result');
+        }
+        function resetExam() {
+            goHome();
+        }
     </script>
 </body>
 </html>
-

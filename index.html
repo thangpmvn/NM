@@ -29,8 +29,8 @@
         .btn-outline { background: white; border: 1px solid #cbd5e1; color: var(--text-main); }
         .btn-success { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-ghost { background: transparent; color: var(--text-sub); font-size: 0.8rem; padding: 8px 12px; border: 1px dashed #cbd5e1; margin-top: 15px; }
-        .btn-ghost:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.05); }
+        .btn-ghost { background: transparent; color: var(--text-sub); font-size: 0.8rem; padding: 5px 10px; border: 1px solid #e2e8f0; }
+        .btn-ghost:hover { color: var(--primary); border-color: var(--primary); background: rgba(79, 70, 229, 0.05); }
 
         /* HEADER */
         .header { background: white; padding: 10px 15px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -93,7 +93,6 @@
         .option.wrong { background: #fef2f2; border-color: var(--danger); animation: shake 0.4s; }
         .option.wrong .option-marker { background: var(--danger); border-color: var(--danger); color: white; content: '✕'; }
         .option.disabled { pointer-events: none; }
-        .option.revealed { opacity: 0.6; }
         
         /* List Mode View */
         .list-option { padding: 10px 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; font-size: 0.95rem; color: #64748b; display: flex; gap: 10px; }
@@ -181,7 +180,7 @@
                 <i class="fa-solid fa-book-open"></i> Ngân hàng 340 câu hỏi (Tra cứu)
             </button>
             
-<div class="footer">
+            <div class="footer">
                 <div class="footer-credit">© 2025 Developed for minhthang@gmail.com</div>
                 <div class="footer-disclaimer">
                     Nội dung đã được biên soạn và rút gọn nhưng <b>không làm thay đổi lựa chọn đáp án</b> 
@@ -192,23 +191,14 @@
                     <div style="font-size: 0.8rem; color: var(--primary); margin-bottom: 10px; font-weight: 600;">
                         <i class="fa-solid fa-laptop-mobile"></i> Bạn muốn chuyển sang máy khác?
                     </div>
-
                     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                        <button class="btn btn-ghost" 
-                                style="margin-top:0; color: var(--primary); border-color: var(--primary);" 
-                                onclick="exportData()"
-                                title="Bấm để lấy mã, sau đó gửi mã này sang máy mới">
+                        <button class="btn btn-ghost" style="margin-top:0; color: var(--primary); border-color: var(--primary);" onclick="exportData()" title="Bấm để lấy mã, sau đó gửi mã này sang máy mới">
                             <i class="fa-solid fa-download"></i> Lấy mã sao lưu
                         </button>
-
-                        <button class="btn btn-ghost" 
-                                style="margin-top:0; color: var(--success); border-color: var(--success);" 
-                                onclick="importData()"
-                                title="Bấm để dán mã từ máy cũ vào đây">
+                        <button class="btn btn-ghost" style="margin-top:0; color: var(--success); border-color: var(--success);" onclick="importData()" title="Bấm để dán mã từ máy cũ vào đây">
                             <i class="fa-solid fa-upload"></i> Nạp mã từ máy cũ
                         </button>
                     </div>
-
                     <div style="margin-top: 10px;">
                         <button class="btn btn-ghost" style="font-size: 0.75rem; opacity: 0.7;" onclick="resetAppConfirm()">
                             <i class="fa-solid fa-trash-can"></i> Xóa dữ liệu & Chơi lại từ đầu
@@ -216,6 +206,7 @@
                     </div>
                 </div>
             </div>
+        </div>
 
         <div id="screen-flashcard" class="screen">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -270,7 +261,7 @@
 
     <script>
         // -------------------------------------------------------------------------
-        // ⚠️ VÙNG DỮ LIỆU: DÁN 340 CÂU HỎI VÀO BÊN DƯỚI BIẾN questionData ⚠️
+        // ⚠️ DỮ LIỆU CÂU HỎI (Dán 340 câu của bạn vào đây) ⚠️
         // -------------------------------------------------------------------------
         const questionData = [
     {
@@ -4362,8 +4353,20 @@
             7: "Xử lý tình huống", 8: "Chuyên đề đặc biệt"
         };
 
-        // GAME STATE
-        let gameState = JSON.parse(localStorage.getItem('pmt_gamify_stats')) || { xp: 0, level: 1, streak: 0, dayStars: {}, dayProgress: {}, hardModeCount: 0 };
+        // --- GAME ENGINE & VERSIONING ---
+        const CURRENT_VERSION = "2.0"; // Mã phiên bản dữ liệu
+        let gameState = JSON.parse(localStorage.getItem('pmt_gamify_stats')) || {};
+
+        // Tự động fix lỗi dữ liệu cũ (Conflict Fix)
+        if (gameState.version !== CURRENT_VERSION) {
+            gameState = {
+                version: CURRENT_VERSION,
+                xp: 0, level: 1, streak: 0,
+                dayStars: {}, dayProgress: {}, hardModeCount: 0
+            };
+            localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState));
+        }
+
         let sessionState = { currentDay: 1, currentIdx: 0, currentMode: 'flashcard', examQuestions: [], userAnswers: {}, timer: null, maxReachedIdx: 0, reviewList: [], isExamActive: false };
         const RANKS = [{lv:1,name:"Tập Sự"},{lv:5,name:"Nhân Viên"},{lv:10,name:"Chuyên Viên"},{lv:20,name:"Chuyên Gia"},{lv:30,name:"Bậc Thầy"},{lv:50,name:"Thần Thầu"}];
 
@@ -4387,7 +4390,6 @@
         }
 
         // --- DYNAMIC MESSAGES (HERO) ---
-// --- DYNAMIC MESSAGES (HERO) - ĐÃ SỬA LỖI IN ĐẬM ---
         function getHeroMessage() {
             const hour = new Date().getHours();
             let greeting = "Chào bạn,";
@@ -4395,23 +4397,18 @@
             else if(hour < 18) greeting = "Chào buổi chiều,";
             else greeting = "Chào buổi tối,";
 
-            // Kịch bản A: Streak cao
             if(gameState.streak > 10) {
                 return {
                     title: `🔥 Phong độ đỉnh cao!`,
                     body: `${greeting} bạn đã trả lời chính xác <b>${gameState.streak}</b> câu liên tiếp. Tư duy của bạn đang rất sắc bén, hãy tận dụng đà này để chinh phục thêm kiến thức nhé!`
                 };
             }
-            
-            // Kịch bản B: Mới bắt đầu hoặc Level thấp
             if(gameState.level < 3) {
                 return {
                     title: "Khởi đầu hành trình",
                     body: "Phương pháp <b>Ghi nhớ Điểm neo</b> giúp cô đọng 340 quy định phức tạp thành các phản xạ đơn giản. Đây là bước đệm chiến lược giúp bạn tiết kiệm thời gian quý báu."
                 };
             }
-
-            // Kịch bản C: Random (Ngẫu nhiên)
             const randomMsgs = [
                 {t: "Kiến thức là sức mạnh", b: `${greeting} mỗi ngày dành 5 phút ôn tập sẽ giúp kiến thức trở thành phản xạ tự nhiên. Chúc bạn có một phiên học hiệu quả!`},
                 {t: "Chiến thuật ôn thi", b: "Hãy ưu tiên hoàn thành các Ngày còn dang dở. Sự liền mạch trong tư duy sẽ giúp bạn ghi nhớ lâu hơn."},
@@ -4445,7 +4442,7 @@
                 grid.appendChild(card);
             });
 
-            // HERO RENDER
+            // HERO & TEST ALL LOGIC
             const hero = document.getElementById('heroBanner');
             const bottom = document.getElementById('bottomExamSection');
             const examBtnHtml = `<button class="btn btn-success" style="width:100%; padding: 15px; font-size:1rem;" onclick="startMixedExam()"><i class="fa-solid fa-trophy"></i> THI THỬ TOÀN BỘ (70 Câu)</button>`;
@@ -4458,7 +4455,7 @@
             }
 
             if(passedDays >= totalDays) {
-                hero.innerHTML = `<h2 style="margin:0 0 10px 0;">🎉 Xuất sắc!</h2><p style="margin-bottom:15px;">Bạn đã hoàn thành lộ trình 8 ngày. Đây là lúc khẳng định đẳng cấp!</p>${examBtnHtml}`;
+                hero.innerHTML = `<h2 style="margin:0 0 10px 0;">🎉 Xuất sắc!</h2><p style="margin-bottom:15px;">Bạn đã hoàn thành tất cả các ngày. Hãy chinh phục đỉnh cao!</p>${examBtnHtml}`;
                 bottom.innerHTML = '';
             } else {
                 hero.innerHTML = heroContent;
@@ -4641,6 +4638,37 @@
             sessionState.currentMode = 'search'; renderListView(res, `Kết quả: "${k}"`);
         }
 
+        // --- EXPORT / IMPORT DATA ---
+        function exportData() {
+            const saveData = { stats: localStorage.getItem('pmt_gamify_stats') };
+            try {
+                const jsonString = JSON.stringify(saveData);
+                const encodedString = btoa(encodeURIComponent(jsonString));
+                navigator.clipboard.writeText(encodedString).then(() => {
+                    alert("✅ Đã copy MÃ SAO LƯU vào bộ nhớ tạm!\n\nHãy gửi mã này qua Zalo/Messenger cho chính mình, sau đó mở trên thiết bị mới và chọn 'Nạp mã từ máy cũ'.");
+                }).catch(() => {
+                    prompt("Hãy copy toàn bộ đoạn mã dưới đây và dán sang máy mới:", encodedString);
+                });
+            } catch (e) { alert("Lỗi khi tạo mã sao lưu: " + e.message); }
+        }
+
+        function importData() {
+            const code = prompt("Dán MÃ SAO LƯU từ thiết bị cũ vào đây:");
+            if (code) {
+                try {
+                    const jsonString = decodeURIComponent(atob(code));
+                    const data = JSON.parse(jsonString);
+                    if (data && data.stats) {
+                        if(confirm("CẢNH BÁO: Dữ liệu hiện tại trên máy này sẽ bị thay thế bởi dữ liệu mới. Bạn có chắc chắn không?")) {
+                            localStorage.setItem('pmt_gamify_stats', data.stats);
+                            alert("✅ Đồng bộ thành công! Trang web sẽ tải lại.");
+                            location.reload();
+                        }
+                    } else { alert("❌ Mã không hợp lệ hoặc bị lỗi."); }
+                } catch (e) { alert("❌ Mã không đúng định dạng. Vui lòng kiểm tra lại."); }
+            }
+        }
+
         // --- HELPERS ---
         function startReviewWrong(ids) {
             const list = questionData.filter(q => ids.includes(q.id));
@@ -4666,7 +4694,7 @@
         function showCombo(n) { const c = document.getElementById('comboEffect'); c.innerText = `COMBO x${n}!`; c.classList.remove('combo-active'); void c.offsetWidth; c.classList.add('combo-active'); }
         function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
         function goHome() { sessionState.isReviewingWrong = false; document.getElementById('searchInput').value=''; showScreen('screen-home'); renderHome(); updateHUD(); }
-        function resetAppConfirm() { if(confirm("CẢNH BÁO: Xóa toàn bộ dữ liệu học?")) { localStorage.clear(); location.reload(); } }
+        function resetAppConfirm() { if(confirm("CẢNH BÁO: Hành động này sẽ xóa toàn bộ tiến trình học của bạn. Bạn có chắc chắn không?")) { localStorage.clear(); location.reload(); } }
         function createConfetti() { const c=['#f00','#0f0','#00f','#ff0']; for(let i=0;i<50;i++){ const d=document.createElement('div'); d.className='confetti'; d.style.left=Math.random()*100+'vw'; d.style.backgroundColor=c[Math.floor(Math.random()*4)]; d.style.animationDuration=(Math.random()*2+2)+'s'; document.body.appendChild(d); setTimeout(()=>d.remove(),4000); }}
         function updateHUD() {
             let r = RANKS[0].name; for(let i of RANKS) if(gameState.level>=i.lv) r=i.name;
@@ -4680,60 +4708,6 @@
         function playTone(f,t,d){if(ac.state==='suspended')ac.resume();const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.setValueAtTime(f,ac.currentTime);g.gain.setValueAtTime(0.1,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}
         function playSound(t){if(t==='correct'){playTone(600,'sine',0.1);setTimeout(()=>playTone(800,'sine',0.2),100);}if(t==='wrong'){playTone(150,'sawtooth',0.3);}if(t==='levelup'){playTone(400,'square',0.1);setTimeout(()=>playTone(600,'square',0.1),150);setTimeout(()=>playTone(800,'square',0.4),300);}}
 
-        // --- TÍNH NĂNG ĐỒNG BỘ THIẾT BỊ (IMPORT/EXPORT) ---
-        
-        // 1. Xuất dữ liệu ra mã
-        function exportData() {
-            // Gom tất cả dữ liệu quan trọng
-            const saveData = {
-                stats: localStorage.getItem('pmt_gamify_stats'),
-                // Nếu sau này có thêm key khác thì thêm vào đây
-            };
-
-            // Mã hóa thành chuỗi Base64 để gọn gàng
-            try {
-                const jsonString = JSON.stringify(saveData);
-                const encodedString = btoa(encodeURIComponent(jsonString)); // encodeURIComponent để hỗ trợ Tiếng Việt nếu có
-                
-                // Copy vào clipboard
-                navigator.clipboard.writeText(encodedString).then(() => {
-                    alert("✅ Đã copy MÃ SAO LƯU vào bộ nhớ tạm!\n\nHãy gửi mã này qua Zalo/Messenger cho chính mình, sau đó mở trên thiết bị mới và chọn 'Nạp mã'.");
-                }).catch(() => {
-                    // Fallback nếu không copy được tự động
-                    prompt("Hãy copy toàn bộ đoạn mã dưới đây và dán sang máy mới:", encodedString);
-                });
-            } catch (e) {
-                alert("Lỗi khi tạo mã sao lưu: " + e.message);
-            }
-        }
-
-        // 2. Nạp dữ liệu từ mã
-        function importData() {
-            const code = prompt("Dán MÃ SAO LƯU từ thiết bị cũ vào đây:");
-            
-            if (code) {
-                try {
-                    // Giải mã
-                    const jsonString = decodeURIComponent(atob(code));
-                    const data = JSON.parse(jsonString);
-
-                    // Kiểm tra dữ liệu hợp lệ
-                    if (data && data.stats) {
-                        if(confirm("CẢNH BÁO: Dữ liệu hiện tại trên máy này sẽ bị thay thế bởi dữ liệu mới. Bạn có chắc chắn không?")) {
-                            localStorage.setItem('pmt_gamify_stats', data.stats);
-                            // Nạp các key khác nếu có
-                            
-                            alert("✅ Đồng bộ thành công! Trang web sẽ tải lại.");
-                            location.reload();
-                        }
-                    } else {
-                        alert("❌ Mã không hợp lệ hoặc bị lỗi.");
-                    }
-                } catch (e) {
-                    alert("❌ Mã không đúng định dạng. Vui lòng kiểm tra lại.");
-                }
-            }
-        }
         init();
     </script>
 </body>

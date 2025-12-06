@@ -4373,9 +4373,26 @@
         // --- INIT & UTILS ---
         function init() { renderHome(); updateHUD(); }
         function saveData() { localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState)); updateHUD(); }
-        function toggleMode() { 
-            document.body.className = document.getElementById('hardModeToggle').checked ? 'hard-mode' : 'easy-mode';
-            gameState.hardModeCount = (gameState.hardModeCount || 0) + 1; saveData();
+function toggleMode() { 
+            const isHard = document.getElementById('hardModeToggle').checked;
+            
+            // 1. Đổi giao diện toàn trang
+            document.body.className = isHard ? 'hard-mode' : 'easy-mode';
+            
+            // 2. Đổi độ đậm nhạt của chữ (FIX LỖI TẠI ĐÂY)
+            if (isHard) {
+                document.getElementById('labelHard').classList.add('active');
+                document.getElementById('labelEasy').classList.remove('active');
+            } else {
+                document.getElementById('labelEasy').classList.add('active');
+                document.getElementById('labelHard').classList.remove('active');
+            }
+
+            // 3. Lưu dữ liệu
+            gameState.hardModeCount = (gameState.hardModeCount || 0) + 1; 
+            saveData();
+            
+            // 4. Render lại để cập nhật gợi ý Hero (nếu cần)
             renderHome(); 
         }
         
@@ -4711,4 +4728,5 @@
         init();
     </script>
 </body>
+
 </html>

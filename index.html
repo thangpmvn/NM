@@ -50,7 +50,7 @@
         .xp-bar-bg { width: 120px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin-top: 5px; }
         .xp-bar-fill { height: 100%; background: #fbbf24; width: 0%; transition: width 0.5s ease; }
         
-        /* TOGGLE - DEFAULT DESKTOP */
+        /* TOGGLE - DEFAULT DESKTOP (NGANG) */
         .mode-toggle-group { display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 8px; border-radius: 20px; border: 1px solid #e2e8f0; flex-shrink: 0; }
         .mode-label { font-size: 0.7rem; font-weight: 600; color: #94a3b8; transition: 0.3s; }
         .mode-label.active { color: var(--primary); font-weight: 800; }
@@ -145,26 +145,46 @@
             /* Header gọn lại */
             .header { gap: 10px; justify-content: space-between; }
             
-            /* Nút nổi GÓC TRÁI GIỮA (Vị trí mới theo yêu cầu) */
+            /* NÚT NỔI GÓC TRÁI DỌC (VERTICAL) */
             .mode-toggle-group {
                 position: fixed;
                 top: 50%;               /* Căn giữa theo chiều dọc */
-                transform: translateY(-50%); /* Dịch chuyển để chính xác giữa */
-                left: 5px;              /* Sát mép trái */
-                bottom: auto;           /* Bỏ căn đáy cũ */
-                z-index: 9999;          /* Nổi lên trên */
+                transform: translateY(-50%); 
+                left: 10px;              /* Sát mép trái */
+                bottom: auto;
+                z-index: 9999;
+                
+                /* Chuyển thành dạng cột (Dọc) */
+                display: flex;
+                flex-direction: column; 
+                gap: 15px; /* Khoảng cách giữa chữ và nút gạt */
                 
                 /* Hiệu ứng kính mờ (Glassmorphism) */
                 background: rgba(255, 255, 255, 0.85); 
                 backdrop-filter: blur(8px);
                 -webkit-backdrop-filter: blur(8px);
                 
-                border: 1px solid rgba(0,0,0,0.1);
+                border: 1px solid rgba(0,0,0,0.15);
                 box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                padding: 6px 10px;
-                border-radius: 50px; /* Bo tròn */
+                
+                /* Padding dạng dọc (cao hơn rộng) */
+                padding: 20px 8px; 
+                border-radius: 50px; /* Bo tròn viên thuốc */
                 
                 flex-shrink: 0;
+            }
+
+            /* Xoay công tắc 90 độ để nó đứng dọc */
+            .switch-toggle {
+                transform: rotate(90deg);
+                margin: 5px 0; /* Chỉnh margin để không bị lẹm */
+            }
+
+            /* Chữ nhỏ lại */
+            .mode-label {
+                font-size: 0.6rem;
+                font-weight: 700;
+                /* Chữ Easy nằm trên, Hard nằm dưới (hoặc ngược lại do flex-direction) */
             }
         }
     </style>
@@ -4808,4 +4828,5 @@
         init();
     </script>
 </body>
+
 </html>

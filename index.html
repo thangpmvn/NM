@@ -115,6 +115,7 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); } 100% { transform: scale(1); } }
         .anim-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-shake { animation: shake 0.4s ease-in-out; }
         .confetti { position: fixed; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 1000; }
         @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
         
@@ -144,12 +145,14 @@
             /* Header gọn lại */
             .header { gap: 10px; justify-content: space-between; }
             
-            /* Nút nổi góc trái dưới (Floating Button) */
+            /* Nút nổi GÓC TRÁI GIỮA (Vị trí mới theo yêu cầu) */
             .mode-toggle-group {
                 position: fixed;
-                bottom: 25px; /* Cách đáy */
-                left: 15px;   /* Góc trái */
-                z-index: 9999; /* Nổi lên trên */
+                top: 50%;               /* Căn giữa theo chiều dọc */
+                transform: translateY(-50%); /* Dịch chuyển để chính xác giữa */
+                left: 5px;              /* Sát mép trái */
+                bottom: auto;           /* Bỏ căn đáy cũ */
+                z-index: 9999;          /* Nổi lên trên */
                 
                 /* Hiệu ứng kính mờ (Glassmorphism) */
                 background: rgba(255, 255, 255, 0.85); 
@@ -157,11 +160,10 @@
                 -webkit-backdrop-filter: blur(8px);
                 
                 border: 1px solid rgba(0,0,0,0.1);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-                padding: 6px 12px;
+                box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+                padding: 6px 10px;
                 border-radius: 50px; /* Bo tròn */
                 
-                /* Đảm bảo kích thước */
                 flex-shrink: 0;
             }
         }
@@ -4394,7 +4396,7 @@
         };
 
         // GAME STATE
-        const CURRENT_VERSION = "2.0"; 
+        const CURRENT_VERSION = "2.1"; // Tăng phiên bản nhẹ
         let gameState = JSON.parse(localStorage.getItem('pmt_gamify_stats')) || {};
 
         if (gameState.version !== CURRENT_VERSION) {
@@ -4414,10 +4416,26 @@
         let lastWrongQuestions = []; 
 
         // --- INIT & UTILS ---
-        function init() { renderHome(); updateHUD(); }
+        function init() { 
+            renderHome(); 
+            updateHUD(); 
+            // Đảm bảo trạng thái nút gạt đúng khi tải trang
+            const isHard = gameState.hardModeCount % 2 !== 0; // Logic đơn giản hóa để check trạng thái
+            document.getElementById('hardModeToggle').checked = isHard;
+            updateToggleUI(isHard);
+        }
+
         function saveData() { localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState)); updateHUD(); }
+        
         function toggleMode() { 
             const isHard = document.getElementById('hardModeToggle').checked;
+            gameState.hardModeCount = (gameState.hardModeCount || 0) + 1; 
+            saveData();
+            updateToggleUI(isHard);
+            renderHome(); 
+        }
+
+        function updateToggleUI(isHard) {
             document.body.className = isHard ? 'hard-mode' : 'easy-mode';
             if (isHard) {
                 document.getElementById('labelHard').classList.add('active');
@@ -4426,8 +4444,6 @@
                 document.getElementById('labelEasy').classList.add('active');
                 document.getElementById('labelHard').classList.remove('active');
             }
-            gameState.hardModeCount = (gameState.hardModeCount || 0) + 1; saveData();
-            renderHome(); 
         }
         
         // --- GUARD ---
@@ -4500,7 +4516,7 @@
             
             const msg = getHeroMessage();
             let heroContent = `<h2 style="margin:0 0 10px 0;">${msg.title}</h2><p style="margin: 0 0 10px 0; opacity: 0.9; font-size: 0.95rem; line-height: 1.5;">${msg.body}</p>`;
-            if ((gameState.hardModeCount || 0) < 10) heroContent += `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;">🚀 <b>Mẹo nhỏ:</b> Khi đã tự tin, bạn có thể gạt nút <b>Hard Mode</b> phía trên để ẩn gợi ý và thử thách trí nhớ!</div>`;
+            if (document.body.classList.contains('easy-mode')) heroContent += `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;">🚀 <b>Mẹo nhỏ:</b> Khi đã tự tin, hãy gạt nút <b>Hard Mode</b> (góc trái) để ẩn gợi ý và thử thách trí nhớ!</div>`;
 
             if(passedDays >= totalDays) {
                 hero.innerHTML = `<h2 style="margin:0 0 10px 0;">🎉 Xuất sắc!</h2><p style="margin-bottom:15px;">Bạn đã hoàn thành tất cả các ngày. Hãy chinh phục đỉnh cao!</p>${examBtnHtml}`;
@@ -4566,53 +4582,38 @@
             setTimeout(()=>btn.classList.remove('anim-shake'), 500);
         }
 
-function checkFlashcard(el, isCorrect) {
+        function checkFlashcard(el, isCorrect) {
             if (el.classList.contains('disabled')) return;
-            
             const fb = document.getElementById('fc-feedback');
-            
             if (isCorrect) {
-                // 1. Hiệu ứng Visual: Đúng
                 el.classList.add('correct', 'anim-pop'); 
                 el.querySelector('.option-marker').textContent = '✓';
-                
-                // Khóa các đáp án lại không cho chọn nữa
                 el.parentElement.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
                 
                 fb.textContent = "Chính xác! Nút 'Câu tiếp' đã mở khóa."; 
                 fb.style.color = "var(--success)"; 
                 playSound('correct');
                 
-                // 2. MỞ KHÓA NÚT NEXT (Quan trọng)
+                // MỞ KHÓA NÚT NEXT
                 const btnNext = document.getElementById('btnNext');
-                btnNext.classList.remove('locked'); // Bỏ màu xám
-                btnNext.onclick = nextCard;         // Gán lại hàm chuyển câu
-                btnNext.classList.add('anim-pop');  // Nảy lên báo hiệu
-                // Thay đổi nội dung nút để mời gọi hơn (tùy chọn)
-                btnNext.innerHTML = `Câu tiếp <i class="fa-solid fa-arrow-right"></i>`;
+                btnNext.classList.remove('locked');
+                btnNext.onclick = nextCard;
+                btnNext.classList.add('anim-pop');
 
-                // 3. Logic Game: Tính điểm
                 if (sessionState.currentIdx === sessionState.maxReachedIdx) {
-                    sessionState.maxReachedIdx++; 
-                    gameState.dayProgress[sessionState.currentDay] = sessionState.maxReachedIdx;
-                    gameState.streak++; 
-                    addXP(10 + (gameState.streak > 1 ? 5 : 0)); 
-                    saveData();
-                    if(gameState.streak >= 2) showCombo(gameState.streak);
+                    sessionState.maxReachedIdx++; gameState.dayProgress[sessionState.currentDay] = sessionState.maxReachedIdx;
+                    gameState.streak++; addXP(10 + (gameState.streak>1?5:0)); saveData();
+                    if(gameState.streak>=2) showCombo(gameState.streak);
                 }
-
-                // 4. [THAY ĐỔI] ĐÃ BỎ DÒNG setTimeout (Tự động chuyển)
-                // Người dùng sẽ tự bấm nút Next khi sẵn sàng.
+                // KHÔNG TỰ ĐỘNG CHUYỂN (Theo yêu cầu mới nhất)
 
             } else {
-                // Xử lý khi SAI
                 el.classList.add('wrong'); 
                 el.querySelector('.option-marker').textContent = '✕';
                 fb.textContent = "Chưa đúng, mời bạn thử lại!"; 
                 fb.style.color = "var(--danger)"; 
                 playSound('wrong');
-                gameState.streak = 0; 
-                saveData();
+                gameState.streak = 0; saveData();
             }
         }
 

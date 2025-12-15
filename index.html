@@ -122,26 +122,36 @@
         .combo-active { animation: floatUp 1.2s ease-out forwards; }
         @keyframes floatUp { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -150px) scale(1); } }
 
+        /* BUTTON LOCKED STATE */
+        .btn.locked {
+            background-color: #cbd5e1;
+            border-color: #cbd5e1;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
         /* FOOTER */
         .footer { text-align: center; padding: 30px 20px; border-top: 1px solid #e2e8f0; margin-top: 40px; background: white; border-radius: var(--radius); }
         .footer-credit { margin-bottom: 5px; color: var(--text-main); font-weight: 700; font-size: 0.85rem; font-family: monospace; }
         .footer-disclaimer { font-size: 0.8rem; line-height: 1.5; color: var(--text-sub); }
 
-        /* --- MOBILE TWEAKS (Phiên bản mới cho nút nổi) --- */
+        /* --- MOBILE TWEAKS --- */
         @media (max-width: 480px) { 
             .logo span { display: none; } 
             
-            /* Điều chỉnh Header khi nút gạt đã tách ra */
+            /* Header gọn lại */
             .header { gap: 10px; justify-content: space-between; }
             
             /* Nút nổi góc trái dưới (Floating Button) */
             .mode-toggle-group {
                 position: fixed;
-                bottom: 25px; /* Cách đáy một chút */
+                bottom: 25px; /* Cách đáy */
                 left: 15px;   /* Góc trái */
-                z-index: 9999; /* Luôn nổi lên trên cùng */
+                z-index: 9999; /* Nổi lên trên */
                 
-                /* Hiệu ứng trong suốt & mờ (Glassmorphism) */
+                /* Hiệu ứng kính mờ (Glassmorphism) */
                 background: rgba(255, 255, 255, 0.85); 
                 backdrop-filter: blur(8px);
                 -webkit-backdrop-filter: blur(8px);
@@ -149,9 +159,9 @@
                 border: 1px solid rgba(0,0,0,0.1);
                 box-shadow: 0 4px 15px rgba(0,0,0,0.15);
                 padding: 6px 12px;
-                border-radius: 50px; /* Bo tròn hình viên thuốc */
+                border-radius: 50px; /* Bo tròn */
                 
-                /* Đảm bảo gọn gàng */
+                /* Đảm bảo kích thước */
                 flex-shrink: 0;
             }
         }
@@ -250,7 +260,7 @@
             <div id="fc-container"></div>
             <div style="display: flex; gap: 10px; justify-content: space-between; margin-top: 20px;">
                 <button class="btn btn-outline" onclick="prevCard()" id="btnPrev"><i class="fa-solid fa-arrow-left"></i> Câu trước</button>
-                <button class="btn btn-primary hidden" id="btnNext" onclick="nextCard()">Câu tiếp <i class="fa-solid fa-arrow-right"></i></button>
+                <button class="btn btn-primary locked" id="btnNext" onclick="showLockedMsg()">Câu tiếp <i class="fa-solid fa-arrow-right"></i></button>
             </div>
             <div class="sub-nav">
                 <div class="sub-nav-btn" onclick="openListMode()"><i class="fa-solid fa-list-ul"></i> Xem danh sách</div>
@@ -295,7 +305,6 @@
         // ⚠️ VÙNG DỮ LIỆU: DÁN 340 CÂU HỎI VÀO BÊN DƯỚI BIẾN questionData ⚠️
         // -------------------------------------------------------------------------
         const questionData = [
-            // Dán dữ liệu 340 câu của bạn vào đây
                 {
         "id": 1,
         "day": 1,
@@ -4376,7 +4385,7 @@
             { "text": "Ngày 01/7/2025", "short": "01/07/2025", "correct": false }
         ]
     }
-        ];
+        ]; // Dán dữ liệu 340 câu của bạn vào đây
 
         const DAY_TOPICS = {
             1: "Khái niệm & Luật chơi", 2: "Kế hoạch & Hình thức", 3: "Đánh giá HSDT",
@@ -4516,35 +4525,94 @@
             sessionState.currentMode = 'flashcard'; updateFlashcardUI(); showScreen('screen-flashcard');
         }
 
+        // Updated UpdateUI with Lock Logic
         function updateFlashcardUI() {
             const qList = questionData.filter(q => q.day == sessionState.currentDay);
             const q = qList[sessionState.currentIdx];
             document.getElementById('fc-title').textContent = `Ngày ${sessionState.currentDay}`;
             document.getElementById('fc-progress').textContent = `${sessionState.currentIdx + 1}/${qList.length}`;
+            
             const btnNext = document.getElementById('btnNext');
-            if (sessionState.currentIdx < sessionState.maxReachedIdx) { btnNext.classList.remove('hidden'); btnNext.innerHTML = `Câu tiếp <i class="fa-solid fa-arrow-right"></i>`; } 
-            else { btnNext.classList.add('hidden'); }
+            
+            // Logic ẩn hiện & Khóa
+            if (sessionState.currentIdx >= qList.length - 1) {
+                btnNext.classList.add('hidden'); // Câu cuối -> Ẩn
+            } else {
+                btnNext.classList.remove('hidden'); // Hiện
+                
+                // Nếu đang học câu mới (chưa qua mức maxReached) -> Khóa
+                if (sessionState.currentIdx >= sessionState.maxReachedIdx) {
+                    btnNext.classList.add('locked');
+                    btnNext.onclick = showLockedMsg;
+                } else {
+                    // Nếu đang xem lại câu cũ -> Mở
+                    btnNext.classList.remove('locked');
+                    btnNext.onclick = nextCard;
+                }
+            }
+
             const isReviewing = sessionState.currentIdx < sessionState.maxReachedIdx;
             document.getElementById('fc-container').innerHTML = `<div class="q-card"><div class="q-content"><span class="full-text">${q.original_question}</span><span class="short-text">${q.short_question}</span></div><div>${q.options.map((opt, idx) => { let cls = 'option'; if(isReviewing){ cls += ' disabled'; if(opt.correct) cls+=' correct'; else cls+=' revealed'; } return `<div class="${cls}" onclick="checkFlashcard(this, ${opt.correct})"><div class="option-marker">${isReviewing && opt.correct ? '✓' : String.fromCharCode(65+idx)}</div><div><span class="full-text">${opt.text}</span><span class="short-text">${opt.short||opt.text}</span></div></div>`; }).join('')}</div><div id="fc-feedback" style="margin-top:10px; font-weight:bold; min-height:20px;"></div></div>`;
         }
 
-        function checkFlashcard(el, isCorrect) {
-            if (el.classList.contains('disabled')) return;
+        function showLockedMsg() {
             const fb = document.getElementById('fc-feedback');
+            fb.textContent = "🔒 Hãy chọn đáp án đúng để mở khóa câu tiếp theo!";
+            fb.style.color = "var(--danger)";
+            
+            // Rung nút
+            const btn = document.getElementById('btnNext');
+            btn.classList.add('anim-shake');
+            setTimeout(()=>btn.classList.remove('anim-shake'), 500);
+        }
+
+function checkFlashcard(el, isCorrect) {
+            if (el.classList.contains('disabled')) return;
+            
+            const fb = document.getElementById('fc-feedback');
+            
             if (isCorrect) {
-                el.classList.add('correct', 'anim-pop'); el.querySelector('.option-marker').textContent = '✓';
+                // 1. Hiệu ứng Visual: Đúng
+                el.classList.add('correct', 'anim-pop'); 
+                el.querySelector('.option-marker').textContent = '✓';
+                
+                // Khóa các đáp án lại không cho chọn nữa
                 el.parentElement.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
-                fb.textContent = "Chính xác! Đang chuyển câu..."; fb.style.color = "var(--success)"; playSound('correct');
+                
+                fb.textContent = "Chính xác! Nút 'Câu tiếp' đã mở khóa."; 
+                fb.style.color = "var(--success)"; 
+                playSound('correct');
+                
+                // 2. MỞ KHÓA NÚT NEXT (Quan trọng)
+                const btnNext = document.getElementById('btnNext');
+                btnNext.classList.remove('locked'); // Bỏ màu xám
+                btnNext.onclick = nextCard;         // Gán lại hàm chuyển câu
+                btnNext.classList.add('anim-pop');  // Nảy lên báo hiệu
+                // Thay đổi nội dung nút để mời gọi hơn (tùy chọn)
+                btnNext.innerHTML = `Câu tiếp <i class="fa-solid fa-arrow-right"></i>`;
+
+                // 3. Logic Game: Tính điểm
                 if (sessionState.currentIdx === sessionState.maxReachedIdx) {
-                    sessionState.maxReachedIdx++; gameState.dayProgress[sessionState.currentDay] = sessionState.maxReachedIdx;
-                    gameState.streak++; addXP(10 + (gameState.streak>1?5:0)); saveData();
-                    if(gameState.streak>=2) showCombo(gameState.streak);
+                    sessionState.maxReachedIdx++; 
+                    gameState.dayProgress[sessionState.currentDay] = sessionState.maxReachedIdx;
+                    gameState.streak++; 
+                    addXP(10 + (gameState.streak > 1 ? 5 : 0)); 
+                    saveData();
+                    if(gameState.streak >= 2) showCombo(gameState.streak);
                 }
-                setTimeout(() => nextCard(), 1200);
+
+                // 4. [THAY ĐỔI] ĐÃ BỎ DÒNG setTimeout (Tự động chuyển)
+                // Người dùng sẽ tự bấm nút Next khi sẵn sàng.
+
             } else {
-                el.classList.add('wrong'); el.querySelector('.option-marker').textContent = '✕';
-                fb.textContent = "Chưa đúng, mời bạn thử lại!"; fb.style.color = "var(--danger)"; playSound('wrong');
-                gameState.streak = 0; saveData();
+                // Xử lý khi SAI
+                el.classList.add('wrong'); 
+                el.querySelector('.option-marker').textContent = '✕';
+                fb.textContent = "Chưa đúng, mời bạn thử lại!"; 
+                fb.style.color = "var(--danger)"; 
+                playSound('wrong');
+                gameState.streak = 0; 
+                saveData();
             }
         }
 
@@ -4555,31 +4623,16 @@
         }
         function prevCard() { if (sessionState.currentIdx > 0) { sessionState.currentIdx--; updateFlashcardUI(); } }
 
-        // --- LIST VIEW ---
-        function openListMode() {
-            sessionState.currentMode = 'list';
-            const qList = questionData.filter(q => q.day == sessionState.currentDay);
-            renderListView(qList, `Danh sách Ngày ${sessionState.currentDay}`);
-        }
-        function showFullDatabase() {
-            sessionState.currentMode = 'full';
-            renderListView(questionData, `Ngân hàng 340 câu hỏi`);
-        }
+        function openListMode() { sessionState.currentMode = 'list'; const qList = questionData.filter(q => q.day == sessionState.currentDay); renderListView(qList, `Danh sách Ngày ${sessionState.currentDay}`); }
+        function showFullDatabase() { sessionState.currentMode = 'full'; renderListView(questionData, `Ngân hàng 340 câu hỏi`); }
         function renderListView(list, title) {
             document.getElementById('list-screen-title').textContent = title;
-            document.getElementById('list-container').innerHTML = list.map(q => `
-                <div class="q-card" style="padding:15px;">
-                    <div style="font-weight:bold; margin-bottom:5px;">Câu ${q.id} (Ngày ${q.day})</div>
-                    <div style="margin-bottom:10px;">${q.original_question}</div>
-                    <div style="background:#f8fafc; padding:10px; border-radius:8px;">
-                        ${q.options.map((o, idx) => `<div class="list-option ${o.correct?'is-correct':''}"><span class="list-option-marker">${String.fromCharCode(65+idx)}.</span><span>${o.text}</span></div>`).join('')}
-                    </div>
-                </div>`).join('');
+            document.getElementById('list-container').innerHTML = list.map(q => `<div class="q-card" style="padding:15px;"><div style="font-weight:bold; margin-bottom:5px;">Câu ${q.id} (Ngày ${q.day})</div><div style="margin-bottom:10px;">${q.original_question}</div><div style="background:#f8fafc; padding:10px; border-radius:8px;">${q.options.map((o, idx) => `<div class="list-option ${o.correct?'is-correct':''}"><span class="list-option-marker">${String.fromCharCode(65+idx)}.</span><span>${o.text}</span></div>`).join('')}</div></div>`).join('');
             showScreen('screen-list');
         }
         function backToFlashcard() { if(sessionState.currentMode === 'list') showScreen('screen-flashcard'); else confirmGoHome(); }
 
-        // --- EXAM LOGIC (UPDATED WITH RETRY FEATURE) ---
+        // --- EXAM LOGIC ---
         function startDailyExamCheck() {
             const qList = questionData.filter(q => q.day == sessionState.currentDay);
             sessionState.examQuestions = [...qList].sort(() => 0.5 - Math.random());

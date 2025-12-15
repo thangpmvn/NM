@@ -50,7 +50,7 @@
         .xp-bar-bg { width: 120px; height: 6px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin-top: 5px; }
         .xp-bar-fill { height: 100%; background: #fbbf24; width: 0%; transition: width 0.5s ease; }
         
-        /* TOGGLE */
+        /* TOGGLE - DEFAULT DESKTOP */
         .mode-toggle-group { display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 8px; border-radius: 20px; border: 1px solid #e2e8f0; flex-shrink: 0; }
         .mode-label { font-size: 0.7rem; font-weight: 600; color: #94a3b8; transition: 0.3s; }
         .mode-label.active { color: var(--primary); font-weight: 800; }
@@ -127,7 +127,34 @@
         .footer-credit { margin-bottom: 5px; color: var(--text-main); font-weight: 700; font-size: 0.85rem; font-family: monospace; }
         .footer-disclaimer { font-size: 0.8rem; line-height: 1.5; color: var(--text-sub); }
 
-        @media (max-width: 480px) { .logo span { display: none; } .header { gap: 10px; } }
+        /* --- MOBILE TWEAKS (Phiên bản mới cho nút nổi) --- */
+        @media (max-width: 480px) { 
+            .logo span { display: none; } 
+            
+            /* Điều chỉnh Header khi nút gạt đã tách ra */
+            .header { gap: 10px; justify-content: space-between; }
+            
+            /* Nút nổi góc trái dưới (Floating Button) */
+            .mode-toggle-group {
+                position: fixed;
+                bottom: 25px; /* Cách đáy một chút */
+                left: 15px;   /* Góc trái */
+                z-index: 9999; /* Luôn nổi lên trên cùng */
+                
+                /* Hiệu ứng trong suốt & mờ (Glassmorphism) */
+                background: rgba(255, 255, 255, 0.85); 
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                
+                border: 1px solid rgba(0,0,0,0.1);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+                padding: 6px 12px;
+                border-radius: 50px; /* Bo tròn hình viên thuốc */
+                
+                /* Đảm bảo gọn gàng */
+                flex-shrink: 0;
+            }
+        }
     </style>
 </head>
 <body class="easy-mode">
@@ -136,10 +163,12 @@
         <div class="logo" onclick="confirmGoHome()">
             <i class="fa-solid fa-graduation-cap"></i> <span>Đấu Thầu Master</span>
         </div>
+        
         <div class="search-box">
             <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm câu hỏi..." onkeypress="handleSearch(event)">
             <i class="fa-solid fa-magnifying-glass search-icon" onclick="executeSearch()"></i>
         </div>
+
         <div class="mode-toggle-group">
             <span id="labelEasy" class="mode-label active">Easy</span>
             <label class="switch-toggle">
@@ -266,7 +295,8 @@
         // ⚠️ VÙNG DỮ LIỆU: DÁN 340 CÂU HỎI VÀO BÊN DƯỚI BIẾN questionData ⚠️
         // -------------------------------------------------------------------------
         const questionData = [
-            {
+            // Dán dữ liệu 340 câu của bạn vào đây
+                {
         "id": 1,
         "day": 1,
         "original_question": "Câu 1: Trường hợp nào sau đây bắt buộc phải lựa chọn nhà thầu theo quy định tại Luật Đấu thầu?",
@@ -4346,7 +4376,8 @@
             { "text": "Ngày 01/7/2025", "short": "01/07/2025", "correct": false }
         ]
     }
-    ]; // Dán dữ liệu 340 câu vào đây
+        ];
+
         const DAY_TOPICS = {
             1: "Khái niệm & Luật chơi", 2: "Kế hoạch & Hình thức", 3: "Đánh giá HSDT",
             4: "Đấu thầu qua mạng", 5: "Chào giá & Mua sắm", 6: "Hợp đồng & Thanh toán",
@@ -4370,8 +4401,8 @@
         const RANKS = [{lv:1,name:"Tập Sự"},{lv:5,name:"Nhân Viên"},{lv:10,name:"Chuyên Viên"},{lv:20,name:"Chuyên Gia"},{lv:30,name:"Bậc Thầy"},{lv:50,name:"Thần Thầu"}];
 
         // --- NEW VARIABLES FOR RETRY FEATURE ---
-        let currentExamDuration = 0; // Để lưu thời gian bài thi gốc
-        let lastWrongQuestions = []; // Để lưu danh sách câu sai của bài thi vừa làm
+        let currentExamDuration = 0; 
+        let lastWrongQuestions = []; 
 
         // --- INIT & UTILS ---
         function init() { renderHome(); updateHUD(); }
@@ -4400,6 +4431,36 @@
             } else goHome();
         }
 
+        // --- DYNAMIC MESSAGES (HERO) ---
+        function getHeroMessage() {
+            const hour = new Date().getHours();
+            let greeting = "Chào bạn,";
+            if(hour < 12) greeting = "Chào buổi sáng,";
+            else if(hour < 18) greeting = "Chào buổi chiều,";
+            else greeting = "Chào buổi tối,";
+
+            if(gameState.streak > 10) {
+                return {
+                    title: `🔥 Phong độ đỉnh cao!`,
+                    body: `${greeting} bạn đã trả lời chính xác <b>${gameState.streak}</b> câu liên tiếp. Tư duy của bạn đang rất sắc bén, hãy tận dụng đà này để chinh phục thêm kiến thức nhé!`
+                };
+            }
+            if(gameState.level < 3) {
+                return {
+                    title: "Khởi đầu hành trình",
+                    body: "Phương pháp <b>Ghi nhớ Điểm neo</b> giúp cô đọng 340 quy định phức tạp thành các phản xạ đơn giản. Đây là bước đệm chiến lược giúp bạn tiết kiệm thời gian quý báu."
+                };
+            }
+            const randomMsgs = [
+                {t: "Kiến thức là sức mạnh", b: `${greeting} mỗi ngày dành 5 phút ôn tập sẽ giúp kiến thức trở thành phản xạ tự nhiên. Chúc bạn có một phiên học hiệu quả!`},
+                {t: "Chiến thuật ôn thi", b: "Hãy ưu tiên hoàn thành các Ngày còn dang dở. Sự liền mạch trong tư duy sẽ giúp bạn ghi nhớ lâu hơn."},
+                {t: "Ghi nhớ & Ứng dụng", b: "Các 'Điểm neo' kiến thức tại đây giúp bạn xử lý nhanh tình huống. Tuy nhiên, để ra quyết định chính xác, việc tra cứu Luật gốc vẫn là nền tảng cốt yếu."},
+                {t: "Thử thách bản thân", b: "Nếu cảm thấy Easy Mode đã quá dễ dàng, hãy thử sức với Hard Mode để kiểm chứng bản lĩnh thực sự của mình."},
+                {t: "Củng cố nền tảng", b: "Sự am hiểu tường tận bắt đầu từ những khái niệm căn bản nhất. Hãy cùng nhau củng cố nền tảng pháp lý vững chắc."}
+            ];
+            return randomMsgs[Math.floor(Math.random() * randomMsgs.length)];
+        }
+
         // --- RENDER HOME ---
         function renderHome() {
             const grid = document.getElementById('dayGrid'); grid.innerHTML = '';
@@ -4415,10 +4476,7 @@
                 if(stars > 0) passedDays++;
                 
                 let starHtml = ''; for(let i=1; i<=3; i++) starHtml += `<i class="fa-solid fa-star star-display ${i<=stars?'active':''}"></i> `;
-                let statusText = '';
-                if (pct >= 100) statusText = '<i class="fa-solid fa-circle-check text-success"></i> Đã thuộc';
-                else if (pct > 0) statusText = '<i class="fa-solid fa-spinner"></i> Đang học';
-                else statusText = 'Chưa bắt đầu';
+                let statusText = pct == 0 ? '' : (pct >= 100 ? '<i class="fa-solid fa-circle-check text-success"></i> Đã thuộc' : '<i class="fa-solid fa-spinner"></i> Đang học');
 
                 const card = document.createElement('div'); card.className = 'day-card';
                 card.innerHTML = `<div class="day-header"><span class="day-badge">Ngày ${day}</span><div>${starHtml}</div></div><div class="day-title">${DAY_TOPICS[day]}</div><div class="day-meta"><span>${statusText}</span><span>${count} câu</span></div><div class="progress-track"><div class="progress-fill" style="width: ${pct}%"></div></div>`;
@@ -4444,7 +4502,7 @@
             }
         }
 
-        // --- FLASHCARD & LIST (Logic giữ nguyên) ---
+        // --- FLASHCARD ---
         function startDayLearning(day) {
             sessionState.currentDay = day;
             const qList = questionData.filter(q => q.day == day);
@@ -4493,15 +4551,30 @@
         function nextCard() {
             const qList = questionData.filter(q => q.day == sessionState.currentDay);
             if (sessionState.currentIdx < qList.length - 1) { sessionState.currentIdx++; updateFlashcardUI(); }
-            else if(confirm("Chúc mừng! Bạn đã hoàn thành. Chuyển sang làm bài KIỂM TRA NGÀY nhé?")) startDailyExamCheck();
+            else if(confirm("Chúc mừng! Bạn đã hoàn thành các từ khóa của ngày hôm nay. Chuyển sang làm bài KIỂM TRA NGÀY nhé?")) startDailyExamCheck();
         }
         function prevCard() { if (sessionState.currentIdx > 0) { sessionState.currentIdx--; updateFlashcardUI(); } }
 
-        function openListMode() { sessionState.currentMode = 'list'; const qList = questionData.filter(q => q.day == sessionState.currentDay); renderListView(qList, `Danh sách Ngày ${sessionState.currentDay}`); }
-        function showFullDatabase() { sessionState.currentMode = 'full'; renderListView(questionData, `Ngân hàng 340 câu hỏi`); }
+        // --- LIST VIEW ---
+        function openListMode() {
+            sessionState.currentMode = 'list';
+            const qList = questionData.filter(q => q.day == sessionState.currentDay);
+            renderListView(qList, `Danh sách Ngày ${sessionState.currentDay}`);
+        }
+        function showFullDatabase() {
+            sessionState.currentMode = 'full';
+            renderListView(questionData, `Ngân hàng 340 câu hỏi`);
+        }
         function renderListView(list, title) {
             document.getElementById('list-screen-title').textContent = title;
-            document.getElementById('list-container').innerHTML = list.map(q => `<div class="q-card" style="padding:15px;"><div style="font-weight:bold; margin-bottom:5px;">Câu ${q.id} (Ngày ${q.day})</div><div style="margin-bottom:10px;">${q.original_question}</div><div style="background:#f8fafc; padding:10px; border-radius:8px;">${q.options.map((o, idx) => `<div class="list-option ${o.correct?'is-correct':''}"><span class="list-option-marker">${String.fromCharCode(65+idx)}.</span><span>${o.text}</span></div>`).join('')}</div></div>`).join('');
+            document.getElementById('list-container').innerHTML = list.map(q => `
+                <div class="q-card" style="padding:15px;">
+                    <div style="font-weight:bold; margin-bottom:5px;">Câu ${q.id} (Ngày ${q.day})</div>
+                    <div style="margin-bottom:10px;">${q.original_question}</div>
+                    <div style="background:#f8fafc; padding:10px; border-radius:8px;">
+                        ${q.options.map((o, idx) => `<div class="list-option ${o.correct?'is-correct':''}"><span class="list-option-marker">${String.fromCharCode(65+idx)}.</span><span>${o.text}</span></div>`).join('')}
+                    </div>
+                </div>`).join('');
             showScreen('screen-list');
         }
         function backToFlashcard() { if(sessionState.currentMode === 'list') showScreen('screen-flashcard'); else confirmGoHome(); }
@@ -4518,7 +4591,6 @@
             startExam(40 * 60);
         }
         function startExam(seconds) {
-            // [NEW] Lưu lại thời lượng bài thi gốc để tính tỷ lệ khi thi lại
             currentExamDuration = seconds;
             sessionState.isExamActive = true; sessionState.userAnswers = {};
             document.getElementById('exam-container').innerHTML = sessionState.examQuestions.map((q, i) => `<div class="q-card" id="exam-q-${q.id}"><div style="color:#64748b; margin-bottom:10px;">Câu ${i+1}</div><div class="q-content">${q.original_question}</div><div>${q.options.map((opt, oid) => `<div class="option" onclick="selectExamOpt(${q.id}, ${oid}, this)"><div class="option-marker">${String.fromCharCode(65+oid)}</div><div>${opt.text}</div></div>`).join('')}</div></div>`).join('');
@@ -4536,21 +4608,20 @@
         function submitExam() {
             sessionState.isExamActive = false; clearInterval(sessionState.timer);
             let correct = 0, total = sessionState.examQuestions.length;
-            lastWrongQuestions = []; // [NEW] Reset danh sách sai
+            lastWrongQuestions = []; 
             let detail = '';
             
             sessionState.examQuestions.forEach((q, i) => {
                 const u = sessionState.userAnswers[q.id]; const c = q.options.findIndex(o => o.correct);
                 const isR = u === c; 
                 if(isR) correct++; 
-                else lastWrongQuestions.push(q); // [NEW] Lưu câu sai
+                else lastWrongQuestions.push(q); 
 
                 detail += `<div class="q-card" style="border-left:5px solid ${isR?'var(--success)':'var(--danger)'}"><div><b>Câu ${i+1}:</b> ${isR?'<span style="color:var(--success)">ĐÚNG</span>':'<span style="color:var(--danger)">SAI</span>'}</div><div style="font-size:0.9rem; margin-top:5px;">${q.original_question}</div>${!isR?`<div style="font-size:0.9rem; color:var(--success); margin-top:5px;">Đáp án: ${q.options[c].text}</div>`:''}</div>`;
             });
             const pct = Math.round((correct/total)*100);
             document.getElementById('result-detail').innerHTML = detail; document.getElementById('result-score').textContent = `${pct}%`;
             
-            // Tính sao (chỉ khi không phải thi lại)
             if(sessionState.currentDay !== 'all' && total > lastWrongQuestions.length) {
                 let stars = 0; if(pct>=50) stars=1; if(pct>=80) stars=2; if(pct==100) stars=3;
                 const old = gameState.dayStars[sessionState.currentDay] || 0;
@@ -4562,7 +4633,6 @@
             const msg = document.getElementById('result-msg');
             const icon = document.getElementById('result-icon');
             
-            // [NEW] Logic hiển thị nút "Làm lại câu sai"
             let retryBtnHtml = '';
             if (lastWrongQuestions.length > 0) {
                 retryBtnHtml = `<button class="btn btn-warning" onclick="retryWrongExam()"><i class="fa-solid fa-rotate-right"></i> Ôn lại ngay ${lastWrongQuestions.length} câu sai</button>`;
@@ -4576,7 +4646,6 @@
                 icon.innerHTML = '🎉'; document.getElementById('result-title').textContent = "Chúc mừng!";
                 msg.textContent = "Bạn đã vượt qua bài kiểm tra!"; createConfetti(); playSound('levelup');
                 
-                // Nút học tiếp (chỉ hiện khi không phải mode thi lại)
                 let nextBtn = '';
                 if(sessionState.currentDay !== 'all' && sessionState.currentDay !== 'retry') {
                     const next = parseInt(sessionState.currentDay)+1;
@@ -4590,21 +4659,15 @@
             showScreen('screen-result');
         }
 
-        // [NEW] Hàm bắt đầu thi lại các câu sai
         function retryWrongExam() {
             if (lastWrongQuestions.length === 0) return;
-            
-            // Tính thời gian tỷ lệ: (Thời gian gốc / Tổng câu gốc) * Số câu sai
-            // Ví dụ: 900s / 10 câu = 90s/câu. Sai 3 câu -> 270s.
-            const totalOriginalQs = sessionState.examQuestions.length; // Số câu của bài thi vừa xong
+            const totalOriginalQs = sessionState.examQuestions.length; 
             const timePerQuestion = currentExamDuration / totalOriginalQs;
             const newDuration = Math.ceil(timePerQuestion * lastWrongQuestions.length);
 
-            // Cập nhật trạng thái
-            sessionState.currentDay = 'retry'; // Đánh dấu đây là bài thi lại
-            sessionState.examQuestions = [...lastWrongQuestions]; // Chỉ lấy câu sai
+            sessionState.currentDay = 'retry'; 
+            sessionState.examQuestions = [...lastWrongQuestions]; 
             
-            // Bắt đầu thi
             startExam(newDuration);
         }
 

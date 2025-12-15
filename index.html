@@ -142,58 +142,81 @@
         /* --- MOBILE TWEAKS --- */
         @media (max-width: 480px) { 
             .logo span { display: none; } 
-            
-            /* Header gọn lại */
             .header { gap: 10px; justify-content: space-between; }
             
-            /* NÚT NỔI DỌC BÊN TRÁI */
+            /* NÚT NỔI DỌC BÁM LỀ (Tab Style) */
             .mode-toggle-group {
                 position: fixed;
                 top: 50%;               
-                transform: translateY(-50%); 
-                left: 10px;
+                left: 0; /* Bám sát lề trái */
                 bottom: auto;
                 z-index: 9999;
                 
-                /* BẮT BUỘC XẾP DỌC */
+                /* Layout dọc */
                 display: flex !important;
                 flex-direction: column !important;
                 gap: 5px; 
                 align-items: center;
+                justify-content: center;
                 
-                /* Kính mờ */
-                background: rgba(255, 255, 255, 0.8); 
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                /* Style Tab bám lề */
+                background: rgba(255, 255, 255, 0.9); /* Độ trong suốt vừa phải */
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
                 
                 border: 1px solid rgba(0,0,0,0.15);
-                box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+                border-left: none; /* Bỏ viền trái để liền mạch với màn hình */
+                box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
                 
-                padding: 15px 5px; 
-                border-radius: 25px; /* Bo tròn */
-                width: 35px; /* Giới hạn chiều rộng */
+                padding: 12px 2px; /* Gọn gàng */
+                border-radius: 0 30px 30px 0; /* Vuông trái, tròn phải */
+                width: 38px; /* Chiều rộng cố định */
                 
-                flex-shrink: 0;
+                /* Quan trọng: Để tránh scroll khi kéo */
+                touch-action: none;
+                transition: opacity 0.3s;
             }
 
-            /* CHỮ XOAY DỌC (Đọc từ dưới lên) */
+            /* Khi không dùng thì mờ đi chút để đỡ vướng mắt */
+            .mode-toggle-group:not(:hover):not(:active) {
+                opacity: 0.8;
+            }
+
+            /* CHỮ XOAY DỌC 90 ĐỘ */
             .mode-label {
                 font-size: 0.65rem;
-                font-weight: 700;
+                font-weight: 800;
+                /* Xoay dọc chữ */
                 writing-mode: vertical-rl;
                 text-orientation: mixed;
                 transform: rotate(180deg);
-                margin: 0;
+                margin: 2px 0;
                 white-space: nowrap;
+                letter-spacing: 1px;
+                color: #94a3b8;
+            }
+            
+            .mode-label.active {
+                color: var(--primary);
             }
 
             /* CÔNG TẮC XOAY DỌC */
-            /* Khi xoay 90deg, Left -> Top (Easy), Right -> Bottom (Hard) */
             .switch {
                 transform: rotate(90deg); 
-                margin: 10px 0; 
-                width: 36px;
-                height: 18px; 
+                margin: 12px 0; 
+                width: 32px; /* Nhỏ hơn xíu cho vừa */
+                height: 16px; 
+            }
+            
+            /* Điều chỉnh chấm tròn công tắc cho khớp size mới */
+            .slider-round:before {
+                height: 12px; 
+                width: 12px; 
+                left: 2px; 
+                bottom: 2px;
+            }
+            input:checked + .slider-round:before { 
+                transform: translateX(16px); 
             }
         }
     </style>
@@ -210,7 +233,7 @@
             <i class="fa-solid fa-magnifying-glass search-icon" onclick="executeSearch()"></i>
         </div>
 
-        <div class="mode-toggle-group">
+        <div class="mode-toggle-group" id="draggableModeToggle">
             <span id="labelEasy" class="mode-label active">Easy</span>
             <label class="switch">
                 <input type="checkbox" id="hardModeToggle" onchange="toggleMode()">
@@ -4432,7 +4455,8 @@
             gameState = {
                 version: CURRENT_VERSION,
                 xp: 0, level: 1, streak: 0,
-                dayStars: {}, dayProgress: {}, hardModeCount: 0
+                dayStars: {}, dayProgress: {}, hardModeCount: 0,
+                toggleTopPos: '50%' // Default pos
             };
             localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState));
         }
@@ -4448,10 +4472,20 @@
         function init() { 
             renderHome(); 
             updateHUD(); 
-            // Đảm bảo trạng thái nút gạt đúng khi tải trang
-            const isHard = gameState.hardModeCount % 2 !== 0; // Logic đơn giản hóa để check trạng thái
+            
+            // Khôi phục trạng thái Hard/Easy
+            const isHard = gameState.hardModeCount % 2 !== 0; 
             document.getElementById('hardModeToggle').checked = isHard;
             updateToggleUI(isHard);
+
+            // Khôi phục vị trí nút gạt (nếu có lưu)
+            if(gameState.toggleTopPos && window.innerWidth <= 480) {
+                const btn = document.getElementById('draggableModeToggle');
+                if(btn) btn.style.top = gameState.toggleTopPos;
+            }
+
+            // Kích hoạt kéo thả cho nút gạt
+            initDraggableToggle();
         }
 
         function saveData() { localStorage.setItem('pmt_gamify_stats', JSON.stringify(gameState)); updateHUD(); }
@@ -4473,6 +4507,58 @@
                 document.getElementById('labelEasy').classList.add('active');
                 document.getElementById('labelHard').classList.remove('active');
             }
+        }
+
+        // --- DRAG & DROP LOGIC CHO NÚT GẠT (MOBILE) ---
+        function initDraggableToggle() {
+            const btn = document.getElementById('draggableModeToggle');
+            if(!btn) return;
+
+            let isDragging = false;
+            let startY, startTop;
+
+            btn.addEventListener('touchstart', (e) => {
+                // Chỉ cho phép kéo trên mobile
+                if(window.innerWidth > 480) return;
+                
+                isDragging = false; // Reset flag
+                startY = e.touches[0].clientY;
+                // Lấy vị trí top hiện tại (dạng pixel)
+                startTop = btn.getBoundingClientRect().top;
+            }, {passive: false});
+
+            btn.addEventListener('touchmove', (e) => {
+                if(window.innerWidth > 480) return;
+                
+                e.preventDefault(); // Ngăn cuộn trang khi đang kéo nút
+                const currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+
+                // Nếu di chuyển > 5px thì tính là đang kéo (Dragging)
+                if (Math.abs(diff) > 5) {
+                    isDragging = true;
+                    // Cập nhật vị trí mới
+                    let newTop = startTop + diff;
+                    
+                    // Giới hạn không cho kéo ra khỏi màn hình
+                    const maxTop = window.innerHeight - btn.offsetHeight;
+                    if(newTop < 0) newTop = 0;
+                    if(newTop > maxTop) newTop = maxTop;
+
+                    btn.style.top = newTop + 'px';
+                    // Reset transform để top hoạt động đúng
+                    btn.style.transform = 'none'; 
+                }
+            }, {passive: false});
+
+            btn.addEventListener('touchend', (e) => {
+                if(isDragging) {
+                    // Nếu là kéo thả -> Lưu vị trí mới
+                    gameState.toggleTopPos = btn.style.top;
+                    saveData();
+                }
+                // Nếu không phải dragging (chạm nhẹ) -> Sự kiện click/change của input bên trong sẽ tự kích hoạt
+            });
         }
         
         // --- GUARD ---
@@ -4545,7 +4631,7 @@
             
             const msg = getHeroMessage();
             let heroContent = `<h2 style="margin:0 0 10px 0;">${msg.title}</h2><p style="margin: 0 0 10px 0; opacity: 0.9; font-size: 0.95rem; line-height: 1.5;">${msg.body}</p>`;
-            if (document.body.classList.contains('easy-mode')) heroContent += `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;">🚀 <b>Mẹo nhỏ:</b> Khi đã tự tin, hãy gạt nút <b>Hard Mode</b> (góc trái) để ẩn gợi ý và thử thách trí nhớ!</div>`;
+            if (document.body.classList.contains('easy-mode')) heroContent += `<div style="margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;">🚀 <b>Mẹo nhỏ:</b> Khi đã tự tin, hãy gạt nút <b>Hard Mode</b> (cạnh trái) để ẩn gợi ý và thử thách trí nhớ!</div>`;
 
             if(passedDays >= totalDays) {
                 hero.innerHTML = `<h2 style="margin:0 0 10px 0;">🎉 Xuất sắc!</h2><p style="margin-bottom:15px;">Bạn đã hoàn thành tất cả các ngày. Hãy chinh phục đỉnh cao!</p>${examBtnHtml}`;

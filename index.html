@@ -54,12 +54,14 @@
         .mode-toggle-group { display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 4px 8px; border-radius: 20px; border: 1px solid #e2e8f0; flex-shrink: 0; }
         .mode-label { font-size: 0.7rem; font-weight: 600; color: #94a3b8; transition: 0.3s; }
         .mode-label.active { color: var(--primary); font-weight: 800; }
-        .switch-toggle { position: relative; display: inline-block; width: 36px; height: 18px; }
-        .switch-toggle input { opacity: 0; width: 0; height: 0; }
+        
+        /* Nút Switch cơ bản */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
         .slider-round { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
-        .slider-round:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .slider-round:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         input:checked + .slider-round { background-color: var(--primary); }
-        input:checked + .slider-round:before { transform: translateX(18px); }
+        input:checked + .slider-round:before { transform: translateX(20px); }
 
         /* SCREENS */
         .screen { display: none; animation: fadeIn 0.3s ease; }
@@ -155,9 +157,9 @@
                 z-index: 9999;
                 
                 /* Chuyển thành dạng cột (Dọc) */
-                display: flex;
-                flex-direction: column; 
-                gap: 15px; /* Khoảng cách giữa chữ và nút gạt */
+                display: flex !important;
+                flex-direction: column !important; /* QUAN TRỌNG: Ép buộc xếp dọc */
+                gap: 5px; /* Khoảng cách giữa chữ và nút */
                 
                 /* Hiệu ứng kính mờ (Glassmorphism) */
                 background: rgba(255, 255, 255, 0.85); 
@@ -167,24 +169,24 @@
                 border: 1px solid rgba(0,0,0,0.15);
                 box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
                 
-                /* Padding dạng dọc (cao hơn rộng) */
-                padding: 20px 8px; 
-                border-radius: 50px; /* Bo tròn viên thuốc */
+                /* Padding dạng dọc */
+                padding: 15px 5px; 
+                border-radius: 50px; 
                 
                 flex-shrink: 0;
             }
 
             /* Xoay công tắc 90 độ để nó đứng dọc */
-            .switch-toggle {
+            .switch {
                 transform: rotate(90deg);
-                margin: 5px 0; /* Chỉnh margin để không bị lẹm */
+                margin: 10px 0; /* Thêm margin vì khi xoay nó sẽ lấn không gian */
             }
 
             /* Chữ nhỏ lại */
             .mode-label {
                 font-size: 0.6rem;
                 font-weight: 700;
-                /* Chữ Easy nằm trên, Hard nằm dưới (hoặc ngược lại do flex-direction) */
+                /* Chữ Easy sẽ nằm trên, Hard nằm dưới */
             }
         }
     </style>
@@ -203,7 +205,7 @@
 
         <div class="mode-toggle-group">
             <span id="labelEasy" class="mode-label active">Easy</span>
-            <label class="switch-toggle">
+            <label class="switch">
                 <input type="checkbox" id="hardModeToggle" onchange="toggleMode()">
                 <span class="slider-round"></span>
             </label>
@@ -4828,5 +4830,4 @@
         init();
     </script>
 </body>
-
 </html>
